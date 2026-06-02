@@ -53,6 +53,7 @@
       <div class="base-layer-bar" aria-label="Base map mode">
         <button type="button" data-base-mode="nautical" data-active="true">Marine</button>
         <button type="button" data-base-mode="street" data-active="false">Map</button>
+        <button type="button" data-base-mode="satellite" data-active="false">Real</button>
         <button type="button" data-base-mode="depth" data-active="false">Depth</button>
       </div>
       <div class="layer-bar" aria-label="Layer toggles">
@@ -68,6 +69,11 @@
         <button type="button" data-chart-layer="shoals" data-active="true">Shoals</button>
         <button type="button" data-chart-layer="quality" data-active="false">Quality</button>
         <button type="button" data-chart-layer="route" data-active="true">Route</button>
+      </div>
+      <div class="depth-legend" aria-label="Depth legend">
+        <span><i class="depth-shallow"></i>0-5m</span>
+        <span><i class="depth-mid"></i>5-20m</span>
+        <span><i class="depth-deep"></i>20m+</span>
       </div>
 
       <div id="chartMap" class="chart-map" role="application" aria-label="Live nautical chart map for Split and Brac"></div>

@@ -17,6 +17,11 @@ const TIMELINE = [
   { label: "+48h", hours: 48 }
 ];
 
+const FORECAST_ARCHIVE_KEY = "adria_fusion_forecast_archive_v1";
+const MAX_LOCAL_ARCHIVE_SNAPSHOTS = 180;
+const GPS_RELOAD_INTERVAL_MS = 15 * 60 * 1000;
+const GPS_RELOAD_DISTANCE_M = 500;
+
 const ROUTE_COORDS = [
   [43.5081, 16.4402],
   [43.4639, 16.5228],
@@ -84,7 +89,11 @@ const state = {
   seed: null,
   liveLoadedAt: null,
   chart: null,
-  chartLayerHealth: {}
+  chartLayerHealth: {},
+  forecastArchiveCount: 0,
+  gpsWatchId: null,
+  lastGpsForecastAt: 0,
+  lastGpsForecastLocation: null
 };
 
 const el = {
@@ -185,6 +194,9 @@ async function loadForecast() {
   ]);
 
   state.seed = seedResult.status === "fulfilled" ? seedResult.value : null;
+  const weatherPayload = weatherResult.status === "fulfilled" ? weatherResult.value : null;
+  const marinePayload = marineResult.status === "fulfilled" ? marineResult.value : null;
+  state.forecastArchiveCount = archiveForecastSnapshot(weatherPayload, marinePayload);
   const weather = sourceResult("Open-Meteo Weather", weatherResult);
   const marine = sourceResult("Open-Meteo Marine", marineResult);
   const seed = state.seed ? {
@@ -197,6 +209,12 @@ async function loadForecast() {
     ok: false,
     mode: "offline",
     message: "Seed snapshot not available"
+  };
+  const localArchive = {
+    name: "Local Forecast Archive",
+    ok: state.forecastArchiveCount > 0,
+    mode: "device",
+    message: `${state.forecastArchiveCount} device snapshots retained from this browser`
   };
   const chart = {
     name: "Chart Layers",
@@ -211,10 +229,10 @@ async function loadForecast() {
     message: "Not bundled; requires official Croatian chart license/distributor access"
   };
 
-  state.sourceHealth = [weather, marine, seed, chart, officialChart];
+  state.sourceHealth = [weather, marine, seed, localArchive, chart, officialChart];
   state.frames = buildFrames(
-    weatherResult.status === "fulfilled" ? weatherResult.value : null,
-    marineResult.status === "fulfilled" ? marineResult.value : null,
+    weatherPayload,
+    marinePayload,
     state.seed
   );
   selectFrame(0);
@@ -237,10 +255,17 @@ function initChartMap() {
   }).setView([DEFAULT_LOCATION.latitude, DEFAULT_LOCATION.longitude], 11);
   L.control.zoom({ position: "bottomright" }).addTo(map);
 
-  const base = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  const streetBase = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxZoom: 18,
     attribution: "&copy; OpenStreetMap contributors"
   }).addTo(map);
+  const satelliteBase = L.tileLayer(
+    "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+    {
+      maxZoom: 19,
+      attribution: "Tiles &copy; Esri - Sources: Esri, Maxar, Earthstar Geographics, and the GIS User Community"
+    }
+  );
   const emodnetMean = L.tileLayer.wms("https://ows.emodnet-bathymetry.eu/wms", {
     layers: "emodnet:mean_multicolour",
     format: "image/png",
@@ -275,7 +300,8 @@ function initChartMap() {
     attribution: "Seamark data &copy; OpenSeaMap contributors",
     opacity: 0.9
   }).addTo(map);
-  registerLayerHealth("OSM", base);
+  registerLayerHealth("OSM", streetBase);
+  registerLayerHealth("Esri World Imagery", satelliteBase);
   registerLayerHealth("EMODnet depth", emodnetMean);
   registerLayerHealth("GEBCO relief", gebcoRelief);
   registerLayerHealth("EMODnet contours", contours);
@@ -336,8 +362,8 @@ function initChartMap() {
   state.chart = {
     ready: true,
     map,
-    layers: { base, depth, contours, seamarks, shoals, quality, route },
-    baseLayers: { base, emodnetMean, gebcoRelief },
+    layers: { streetBase, satelliteBase, depth, contours, seamarks, shoals, quality, route },
+    baseLayers: { streetBase, satelliteBase, emodnetMean, gebcoRelief },
     meteo,
     positionMarker,
     accuracyCircle
@@ -360,19 +386,21 @@ function setMapMode(mode) {
 }
 
 function setBaseMode(mode) {
-  state.baseMode = ["nautical", "street", "depth"].includes(mode) ? mode : "nautical";
+  state.baseMode = ["nautical", "street", "satellite", "depth"].includes(mode) ? mode : "nautical";
   document.querySelectorAll("[data-base-mode]").forEach((button) => {
     button.dataset.active = String(button.dataset.baseMode === state.baseMode);
   });
   if (!state.chart?.ready) return;
-  const { base, depth, contours, seamarks, shoals, quality, route } = state.chart.layers;
+  const { streetBase, satelliteBase, depth, contours, seamarks, shoals, quality, route } = state.chart.layers;
   const wanted = {
     nautical: { depth: true, contours: true, seamarks: true, shoals: true, quality: false, route: true, depthOpacity: 0.48, reliefOpacity: 0.18 },
     street: { depth: false, contours: false, seamarks: true, shoals: true, quality: false, route: true, depthOpacity: 0.24, reliefOpacity: 0.1 },
+    satellite: { depth: false, contours: true, seamarks: true, shoals: true, quality: false, route: true, depthOpacity: 0.18, reliefOpacity: 0.06 },
     depth: { depth: true, contours: true, seamarks: false, shoals: true, quality: true, route: true, depthOpacity: 0.72, reliefOpacity: 0.28 }
   }[state.baseMode];
 
-  if (!state.chart.map.hasLayer(base)) base.addTo(state.chart.map);
+  setLayerActive(streetBase, state.baseMode !== "satellite");
+  setLayerActive(satelliteBase, state.baseMode === "satellite");
   Object.entries(wanted).forEach(([name, active]) => {
     if (name.endsWith("Opacity")) return;
     const layer = { depth, contours, seamarks, shoals, quality, route }[name];
@@ -417,7 +445,7 @@ function chartLayerSummary() {
   const entries = Object.entries(state.chartLayerHealth);
   if (!entries.length) return "OSM, OpenSeaMap and EMODnet configured";
   const failed = entries.filter(([, value]) => !value.ok);
-  if (failed.length === 0) return "OSM, OpenSeaMap, EMODnet depth/contours and GEBCO available";
+  if (failed.length === 0) return "OSM, Esri imagery, OpenSeaMap, EMODnet depth/contours and GEBCO available";
   return `Layer warning: ${failed.map(([name]) => name).join(", ")}`;
 }
 
@@ -498,6 +526,52 @@ function sourceResult(name, result) {
     return { name, ok: true, mode: "live", message: "Live API loaded" };
   }
   return { name, ok: false, mode: "fallback", message: result.reason?.message || "not available" };
+}
+
+function archiveForecastSnapshot(weather, marine) {
+  const currentCount = readForecastArchiveCount();
+  if (!weather && !marine) return currentCount;
+  try {
+    const archive = JSON.parse(localStorage.getItem(FORECAST_ARCHIVE_KEY) || "[]");
+    const snapshot = {
+      schema_version: "adria_fusion_device_forecast_snapshot_v1",
+      issued_at: new Date().toISOString(),
+      location: {
+        id: state.location.id,
+        name: state.location.name,
+        latitude: Number(state.location.latitude.toFixed(5)),
+        longitude: Number(state.location.longitude.toFixed(5)),
+        timezone: state.location.timezone
+      },
+      providers: {
+        open_meteo_weather: Boolean(weather),
+        open_meteo_marine: Boolean(marine)
+      },
+      frames: TIMELINE.map((item) => ({
+        label: item.label,
+        lead_hours: item.hours,
+        weather: pickWeather(weather, item.hours),
+        marine: pickMarine(marine, item.hours)
+      }))
+    };
+    archive.unshift(snapshot);
+    localStorage.setItem(
+      FORECAST_ARCHIVE_KEY,
+      JSON.stringify(archive.slice(0, MAX_LOCAL_ARCHIVE_SNAPSHOTS))
+    );
+    return Math.min(archive.length, MAX_LOCAL_ARCHIVE_SNAPSHOTS);
+  } catch {
+    return currentCount;
+  }
+}
+
+function readForecastArchiveCount() {
+  try {
+    const archive = JSON.parse(localStorage.getItem(FORECAST_ARCHIVE_KEY) || "[]");
+    return Array.isArray(archive) ? archive.length : 0;
+  } catch {
+    return 0;
+  }
 }
 
 function buildFrames(weather, marine, seed) {
@@ -642,6 +716,19 @@ function calculateConfidence({ weatherOk, marineOk, seedOk, leadHours }) {
   return Math.max(20, Math.min(cap, score));
 }
 
+function currentFusionWeights(frame) {
+  const leadFactor = Math.max(0.55, 1 - frame.hours * 0.012);
+  const raw = {
+    weather: frame.weather.sourceOk ? 0.42 * leadFactor : 0,
+    marine: frame.marine.sourceOk ? 0.42 * leadFactor : 0,
+    seed: frame.fallback ? 0.16 : 0
+  };
+  const total = Object.values(raw).reduce((sum, value) => sum + value, 0) || 1;
+  return Object.fromEntries(
+    Object.entries(raw).map(([name, value]) => [name, (value / total).toFixed(2)])
+  );
+}
+
 function describeCondition(weather, marine, confidence) {
   const windKn = kmhToKnots(weather.windSpeedKmh);
   const wave = marine.waveHeight;
@@ -702,11 +789,14 @@ function renderSourceHealth() {
 
 function renderCalculation(frame) {
   const windKn = kmhToKnots(frame.weather.windSpeedKmh);
+  const weights = currentFusionWeights(frame);
   const sourceLine = `source_count=${frame.sources}, lead=${frame.hours}h`;
   const capLine = frame.sources < 2 ? "cap=60 because fewer than two independent live forecast sources" : "cap=72 prototype cap";
   const weatherLine = `wind=${windKn ?? "na"}kn, temp=${frame.weather.temperature ?? "na"}C`;
   const marineLine = `wave=${frame.marine.waveHeight ?? "na"}m, current=${kmhToKnots(frame.marine.currentVelocityKmh) ?? "na"}kn`;
-  const chartLine = `chart=${state.baseMode}, depth=EMODnet, seamarks=OpenSeaMap, official_enc=not_bundled`;
+  const chartLine = `chart=${state.baseMode}, depth=EMODnet, seamarks=OpenSeaMap, satellite=Esri, official_enc=not_bundled`;
+  const archiveLine = `archive=${state.forecastArchiveCount}/${MAX_LOCAL_ARCHIVE_SNAPSHOTS} local forecast snapshots`;
+  const weightLine = `weights weather=${weights.weather}, marine=${weights.marine}, seed=${weights.seed}`;
   const confidenceLine = `confidence=${frame.confidence}/100, mode=${frame.condition}`;
   el.calculationBox.textContent = [
     sourceLine,
@@ -714,6 +804,8 @@ function renderCalculation(frame) {
     weatherLine,
     marineLine,
     chartLine,
+    archiveLine,
+    weightLine,
     confidenceLine,
     "",
     "planned fusion:",
@@ -887,7 +979,7 @@ function updateChartStatus(frame, override) {
     return;
   }
   if (!frame) {
-    el.chartStatus.textContent = "Chart layers: OSM base, OpenSeaMap seamarks, EMODnet depth/contours.";
+    el.chartStatus.textContent = "Chart layers: OSM/Esri base, OpenSeaMap seamarks, EMODnet depth/contours.";
     return;
   }
   const windKn = kmhToKnots(frame.weather.windSpeedKmh);
@@ -895,7 +987,7 @@ function updateChartStatus(frame, override) {
     ? Object.entries(state.chart.layers)
       .filter(([, layer]) => state.chart.map.hasLayer(layer))
       .map(([name]) => name)
-      .filter((name) => name !== "base")
+      .filter((name) => !["streetBase", "satelliteBase"].includes(name))
       .join("/")
     : "na";
   el.chartStatus.textContent = [
@@ -923,37 +1015,80 @@ function useGps() {
     updateGpsState("GPS unavailable");
     return;
   }
+  if (state.gpsWatchId !== null) {
+    navigator.geolocation.clearWatch(state.gpsWatchId);
+    state.gpsWatchId = null;
+    updateGpsState("GPS");
+    return;
+  }
   updateGpsState("GPS...");
   navigator.geolocation.getCurrentPosition(
-    async (position) => {
-      const { latitude, longitude, accuracy } = position.coords;
-      state.location = {
-        id: "gps",
-        name: "GPS Position",
-        routeName: "GPS Sailing Position",
-        latitude,
-        longitude,
-        timezone: DEFAULT_LOCATION.timezone
-      };
-      el.positionDot.setAttribute("cx", "126");
-      el.positionDot.setAttribute("cy", "308");
-      el.accuracyRing.setAttribute("cx", "126");
-      el.accuracyRing.setAttribute("cy", "308");
-      el.accuracyRing.setAttribute("r", String(Math.max(18, Math.min(70, accuracy / 8))));
-      if (state.chart?.accuracyCircle) {
-        state.chart.accuracyCircle.setRadius(Math.max(25, Math.min(1500, accuracy)));
-        state.chart.map.setView([latitude, longitude], Math.max(state.chart.map.getZoom(), 12));
-      }
-      updateGpsState("GPS fix");
-      await loadForecast();
-    },
+    (position) => applyGpsPosition(position, true),
     () => updateGpsState("GPS blocked"),
     { enableHighAccuracy: true, timeout: 6000, maximumAge: 0 }
   );
+  state.gpsWatchId = navigator.geolocation.watchPosition(
+    (position) => applyGpsPosition(position, false),
+    () => updateGpsState("GPS blocked"),
+    { enableHighAccuracy: true, timeout: 12000, maximumAge: 5000 }
+  );
+}
+
+async function applyGpsPosition(position, forceReload) {
+  const { latitude, longitude, accuracy } = position.coords;
+  const shouldReload = forceReload || shouldReloadGpsForecast(latitude, longitude);
+  state.location = {
+    id: "gps",
+    name: "GPS Position",
+    routeName: "GPS Sailing Position",
+    latitude,
+    longitude,
+    timezone: DEFAULT_LOCATION.timezone
+  };
+  el.positionDot.setAttribute("cx", "126");
+  el.positionDot.setAttribute("cy", "308");
+  el.accuracyRing.setAttribute("cx", "126");
+  el.accuracyRing.setAttribute("cy", "308");
+  el.accuracyRing.setAttribute("r", String(Math.max(18, Math.min(70, accuracy / 8))));
+  if (state.chart?.accuracyCircle) {
+    state.chart.accuracyCircle.setRadius(Math.max(25, Math.min(1500, accuracy)));
+    state.chart.map.setView([latitude, longitude], Math.max(state.chart.map.getZoom(), 12));
+  }
+  updateGpsState("GPS live");
+  if (shouldReload) {
+    state.lastGpsForecastAt = Date.now();
+    state.lastGpsForecastLocation = { latitude, longitude };
+    await loadForecast();
+  } else {
+    renderFrame();
+  }
+}
+
+function shouldReloadGpsForecast(latitude, longitude) {
+  if (!state.lastGpsForecastAt || !state.lastGpsForecastLocation) return true;
+  const age = Date.now() - state.lastGpsForecastAt;
+  const moved = distanceMeters(state.lastGpsForecastLocation, { latitude, longitude });
+  return age > GPS_RELOAD_INTERVAL_MS || moved > GPS_RELOAD_DISTANCE_M;
+}
+
+function distanceMeters(a, b) {
+  const radiusM = 6371000;
+  const lat1 = a.latitude * Math.PI / 180;
+  const lat2 = b.latitude * Math.PI / 180;
+  const dLat = (b.latitude - a.latitude) * Math.PI / 180;
+  const dLon = (b.longitude - a.longitude) * Math.PI / 180;
+  const sinLat = Math.sin(dLat / 2);
+  const sinLon = Math.sin(dLon / 2);
+  const h = sinLat * sinLat + Math.cos(lat1) * Math.cos(lat2) * sinLon * sinLon;
+  return 2 * radiusM * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h));
 }
 
 function updateGpsState(text) {
-  el.gpsButton.textContent = text;
+  if (!el.gpsButton) return;
+  const dot = document.createElement("span");
+  dot.className = "gps-dot";
+  dot.setAttribute("aria-hidden", "true");
+  el.gpsButton.replaceChildren(dot, document.createTextNode(text));
 }
 
 function renderLoadingState() {

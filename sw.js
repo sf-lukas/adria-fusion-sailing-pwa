@@ -1,7 +1,8 @@
-const CACHE_NAME = "adria-fusion-sailing-v0-5";
+const CACHE_NAME = "adria-fusion-sailing-v0-6";
 const NETWORK_ONLY_HOSTS = new Set([
   "tile.openstreetmap.org",
   "tiles.openseamap.org",
+  "server.arcgisonline.com",
   "ows.emodnet-bathymetry.eu",
   "wms.gebco.net",
   "unpkg.com"

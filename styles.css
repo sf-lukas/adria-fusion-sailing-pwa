@@ -146,6 +146,7 @@ h2 {
 .map-card[data-mode="chart"] .layer-bar,
 .map-card[data-mode="forecast"] .base-layer-bar,
 .map-card[data-mode="forecast"] .chart-layer-bar,
+.map-card[data-mode="forecast"] .depth-legend,
 .map-card[data-mode="forecast"] .chart-map {
   display: none;
 }
@@ -186,7 +187,7 @@ h2 {
   right: 10px;
   z-index: 12;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 6px;
 }
 
@@ -225,6 +226,48 @@ h2 {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 6px;
+}
+
+.depth-legend {
+  position: absolute;
+  top: 132px;
+  right: 10px;
+  z-index: 12;
+  display: grid;
+  gap: 4px;
+  width: 108px;
+  padding: 7px;
+  border: 1px solid rgba(16, 33, 31, .18);
+  background: rgba(255, 253, 247, .9);
+  color: var(--deep);
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.depth-legend span {
+  display: grid;
+  grid-template-columns: 14px 1fr;
+  gap: 5px;
+  align-items: center;
+}
+
+.depth-legend i {
+  display: block;
+  width: 14px;
+  height: 8px;
+  border: 1px solid rgba(16, 33, 31, .2);
+}
+
+.depth-shallow {
+  background: #d8c178;
+}
+
+.depth-mid {
+  background: #73b7c7;
+}
+
+.depth-deep {
+  background: #276d91;
 }
 
 .chart-map,
@@ -637,6 +680,7 @@ pre {
     top: 50px;
     left: 8px;
     right: 8px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 4px;
   }
 
@@ -646,6 +690,13 @@ pre {
     right: 8px;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 4px;
+  }
+
+  .depth-legend {
+    top: 166px;
+    right: 8px;
+    width: 102px;
+    padding: 6px;
   }
 
   .layer-bar button {

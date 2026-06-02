@@ -43,6 +43,14 @@
       "prototype_status": "active_prototype_tile_policy_limited"
     },
     {
+      "id": "esri_world_imagery",
+      "name": "Esri World Imagery",
+      "url": "https://www.arcgis.com/home/item.html?id=b4d457217e6641d682cab85f26db7bd0",
+      "role": "Real-map satellite basemap for coastline, harbor and shallow-water visual context",
+      "variables": ["satellite imagery", "coastline visual inspection"],
+      "prototype_status": "active_visual_context_attribution_required_not_official_navigation"
+    },
+    {
       "id": "openseamap_seamarks",
       "name": "OpenSeaMap Seamark Tiles",
       "url": "https://wiki.openseamap.org/wiki/h:En:OpenSeaMap_in_Website",
