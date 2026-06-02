@@ -11,6 +11,14 @@
       "prototype_status": "active"
     },
     {
+      "id": "met_no_locationforecast",
+      "name": "MET Norway Locationforecast",
+      "url": "https://api.met.no/weatherapi/locationforecast/2.0/documentation",
+      "role": "Backend-side second weather provider for fused forecast snapshots",
+      "variables": ["temperature_2m", "relative_humidity_2m", "wind_speed_10m", "wind_direction_10m", "pressure_msl"],
+      "prototype_status": "active_backend_user_agent_required"
+    },
+    {
       "id": "open_meteo_marine",
       "name": "Open-Meteo Marine API",
       "url": "https://open-meteo.com/en/docs/marine-weather-api",

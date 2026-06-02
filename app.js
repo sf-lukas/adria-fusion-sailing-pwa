@@ -8,19 +8,269 @@ const DEFAULT_LOCATION = {
 };
 
 const TIMELINE = [
-  { label: "Now", hours: 0 },
-  { label: "+1h", hours: 1 },
-  { label: "+3h", hours: 3 },
-  { label: "+6h", hours: 6 },
-  { label: "+12h", hours: 12 },
-  { label: "+24h", hours: 24 },
-  { label: "+48h", hours: 48 }
+  { key: "now", label: "Now", hours: 0 },
+  { key: "h1", label: "+1h", hours: 1 },
+  { key: "h3", label: "+3h", hours: 3 },
+  { key: "h6", label: "+6h", hours: 6 },
+  { key: "h12", label: "+12h", hours: 12 },
+  { key: "h24", label: "+24h", hours: 24 },
+  { key: "h48", label: "+48h", hours: 48 }
 ];
 
+const LANGUAGE_KEY = "adria_fusion_language";
 const FORECAST_ARCHIVE_KEY = "adria_fusion_forecast_archive_v1";
 const MAX_LOCAL_ARCHIVE_SNAPSHOTS = 180;
 const GPS_RELOAD_INTERVAL_MS = 15 * 60 * 1000;
 const GPS_RELOAD_DISTANCE_M = 500;
+
+const I18N = {
+  en: {
+    "status.confidence": "confidence",
+    "status.sources": "sources",
+    "status.freshness": "freshness",
+    "status.truth": "truth",
+    "mode.chart": "Real map",
+    "mode.forecast": "Forecast",
+    "base.nautical": "Marine",
+    "base.street": "Map",
+    "base.satellite": "Real",
+    "base.depth": "Depth",
+    "layer.wind": "Wind",
+    "layer.wave": "Wave",
+    "layer.current": "Current",
+    "layer.warnings": "Warnings",
+    "chart.depth": "Depth",
+    "chart.contours": "Lines",
+    "chart.seamarks": "Marks",
+    "chart.shoals": "Shoals",
+    "chart.quality": "Quality",
+    "chart.route": "Route",
+    "metric.wind": "wind",
+    "metric.wave": "wave",
+    "metric.current": "current",
+    "metric.sea": "sea temp",
+    "panel.sources": "Source health",
+    "panel.quality": "Quality dashboard",
+    "panel.calculation": "Calculation",
+    "nav.map": "Map",
+    "nav.data": "Data",
+    "nav.privacy": "Privacy",
+    "nav.sources": "Sources",
+    "timeline.now": "Now",
+    "timeline.h1": "+1h",
+    "timeline.h3": "+3h",
+    "timeline.h6": "+6h",
+    "timeline.h12": "+12h",
+    "timeline.h24": "+24h",
+    "timeline.h48": "+48h",
+    "frame.suffix": "frame",
+    "condition.loading": "Loading forecast",
+    "condition.trend": "Trend only - verify before departure",
+    "condition.wind": "Wind window is demanding",
+    "condition.wave": "Wave comfort is reduced",
+    "condition.usable": "Usable sailing window",
+    "condition.partial": "Partial forecast coverage",
+    "gps.idle": "GPS",
+    "gps.loading": "GPS...",
+    "gps.live": "GPS live",
+    "gps.fix": "GPS fix",
+    "gps.blocked": "GPS blocked",
+    "gps.unavailable": "GPS unavailable",
+    "source.weather": "Open-Meteo Weather",
+    "source.backendFusion": "Backend Fusion",
+    "source.marine": "Open-Meteo Marine",
+    "source.seed": "DHMZ Seed Truth",
+    "source.archive": "Local Forecast Archive",
+    "source.chart": "Chart Layers",
+    "source.official": "HHI/PRIMAR Official ENC",
+    "quality.forecast": "Forecast",
+    "quality.sources": "Sources",
+    "quality.wind": "Wind",
+    "quality.wave": "Wave",
+    "quality.current": "Current",
+    "quality.bathymetry": "Bathymetry",
+    "quality.gps": "GPS",
+    "quality.archive": "Archive",
+    "quality.live": "live",
+    "quality.seed": "seed",
+    "quality.none": "none",
+    "quality.ready": "ready",
+    "quality.limited": "limited",
+    "quality.offline": "offline",
+    "quality.officialHold": "official chart hold",
+    "quality.currentCap": "coastal-current cap",
+    "chart.initial": "Chart layers: OSM/Esri base, OpenSeaMap seamarks, EMODnet depth/contours.",
+    "chart.unavailable": "Live chart library unavailable; using forecast fallback.",
+    "chart.dataState": "{summary}. Official ENC/HHI charts are not bundled.",
+    "chart.status": "Map {base} {frame}: confidence {confidence}/100 | layers {layers} | wind {wind} kn | wave {wave} | depth/shallows are planning context",
+    "chart.depthQuery": "Depth query...",
+    "chart.depthFailed": "Depth point query failed; map layers remain visual planning context."
+  },
+  de: {
+    "status.confidence": "Vertrauen",
+    "status.sources": "Quellen",
+    "status.freshness": "Frische",
+    "status.truth": "Truth",
+    "mode.chart": "Echte Karte",
+    "mode.forecast": "Forecast",
+    "base.nautical": "Marine",
+    "base.street": "Karte",
+    "base.satellite": "Real",
+    "base.depth": "Tiefe",
+    "layer.wind": "Wind",
+    "layer.wave": "Welle",
+    "layer.current": "Strom",
+    "layer.warnings": "Warnung",
+    "chart.depth": "Tiefe",
+    "chart.contours": "Linien",
+    "chart.seamarks": "Marken",
+    "chart.shoals": "Untiefen",
+    "chart.quality": "Quali",
+    "chart.route": "Route",
+    "metric.wind": "Wind",
+    "metric.wave": "Welle",
+    "metric.current": "Strom",
+    "metric.sea": "Meer",
+    "panel.sources": "Quellenstatus",
+    "panel.quality": "Qualitaets-Dashboard",
+    "panel.calculation": "Berechnung",
+    "nav.map": "Karte",
+    "nav.data": "Daten",
+    "nav.privacy": "Privacy",
+    "nav.sources": "Quellen",
+    "timeline.now": "Jetzt",
+    "timeline.h1": "+1h",
+    "timeline.h3": "+3h",
+    "timeline.h6": "+6h",
+    "timeline.h12": "+12h",
+    "timeline.h24": "+24h",
+    "timeline.h48": "+48h",
+    "frame.suffix": "Frame",
+    "condition.loading": "Forecast laedt",
+    "condition.trend": "Nur Trend - vor Abfahrt pruefen",
+    "condition.wind": "Windfenster ist anspruchsvoll",
+    "condition.wave": "Wellenkomfort reduziert",
+    "condition.usable": "Nutzbares Segelfenster",
+    "condition.partial": "Teilweise Forecast-Abdeckung",
+    "gps.idle": "GPS",
+    "gps.loading": "GPS...",
+    "gps.live": "GPS live",
+    "gps.fix": "GPS fix",
+    "gps.blocked": "GPS blockiert",
+    "gps.unavailable": "GPS fehlt",
+    "source.weather": "Open-Meteo Wetter",
+    "source.backendFusion": "Backend-Fusion",
+    "source.marine": "Open-Meteo Marine",
+    "source.seed": "DHMZ Seed Truth",
+    "source.archive": "Lokales Forecast-Archiv",
+    "source.chart": "Kartenlayer",
+    "source.official": "HHI/PRIMAR amtliche ENC",
+    "quality.forecast": "Forecast",
+    "quality.sources": "Quellen",
+    "quality.wind": "Wind",
+    "quality.wave": "Welle",
+    "quality.current": "Strom",
+    "quality.bathymetry": "Bathymetrie",
+    "quality.gps": "GPS",
+    "quality.archive": "Archiv",
+    "quality.live": "live",
+    "quality.seed": "seed",
+    "quality.none": "keine",
+    "quality.ready": "bereit",
+    "quality.limited": "begrenzt",
+    "quality.offline": "offline",
+    "quality.officialHold": "amtliche Karte hold",
+    "quality.currentCap": "Kuestenstrom-Cap",
+    "chart.initial": "Kartenlayer: OSM/Esri Basis, OpenSeaMap Marken, EMODnet Tiefe/Linien.",
+    "chart.unavailable": "Live-Karte nicht verfuegbar; Forecast-Fallback aktiv.",
+    "chart.dataState": "{summary}. Amtliche ENC/HHI-Karten sind nicht gebundelt.",
+    "chart.status": "Karte {base} {frame}: Vertrauen {confidence}/100 | Layer {layers} | Wind {wind} kn | Welle {wave} | Tiefe/Untiefen sind Planungskontext",
+    "chart.depthQuery": "Tiefe wird abgefragt...",
+    "chart.depthFailed": "Tiefenpunkt-Abfrage fehlgeschlagen; Kartenlayer bleiben Planungskontext."
+  },
+  hr: {
+    "status.confidence": "pouzdanost",
+    "status.sources": "izvori",
+    "status.freshness": "svjezina",
+    "status.truth": "truth",
+    "mode.chart": "Stvarna karta",
+    "mode.forecast": "Prognoza",
+    "base.nautical": "More",
+    "base.street": "Karta",
+    "base.satellite": "Real",
+    "base.depth": "Dubina",
+    "layer.wind": "Vjetar",
+    "layer.wave": "Val",
+    "layer.current": "Struja",
+    "layer.warnings": "Upoz.",
+    "chart.depth": "Dubina",
+    "chart.contours": "Linije",
+    "chart.seamarks": "Oznake",
+    "chart.shoals": "Plicine",
+    "chart.quality": "Kval.",
+    "chart.route": "Ruta",
+    "metric.wind": "vjetar",
+    "metric.wave": "val",
+    "metric.current": "struja",
+    "metric.sea": "more",
+    "panel.sources": "Stanje izvora",
+    "panel.quality": "Kvaliteta podataka",
+    "panel.calculation": "Izracun",
+    "nav.map": "Karta",
+    "nav.data": "Podaci",
+    "nav.privacy": "Privatnost",
+    "nav.sources": "Izvori",
+    "timeline.now": "Sada",
+    "timeline.h1": "+1h",
+    "timeline.h3": "+3h",
+    "timeline.h6": "+6h",
+    "timeline.h12": "+12h",
+    "timeline.h24": "+24h",
+    "timeline.h48": "+48h",
+    "frame.suffix": "okvir",
+    "condition.loading": "Prognoza se ucitava",
+    "condition.trend": "Samo trend - provjeriti prije polaska",
+    "condition.wind": "Vjetar je zahtjevan",
+    "condition.wave": "Komfor vala je smanjen",
+    "condition.usable": "Upotrebljiv prozor za jedrenje",
+    "condition.partial": "Djelomicna prognoza",
+    "gps.idle": "GPS",
+    "gps.loading": "GPS...",
+    "gps.live": "GPS live",
+    "gps.fix": "GPS fix",
+    "gps.blocked": "GPS blok.",
+    "gps.unavailable": "GPS nema",
+    "source.weather": "Open-Meteo vrijeme",
+    "source.backendFusion": "Backend fusion",
+    "source.marine": "Open-Meteo more",
+    "source.seed": "DHMZ seed truth",
+    "source.archive": "Lokalna arhiva prognoze",
+    "source.chart": "Slojevi karte",
+    "source.official": "HHI/PRIMAR sluzbena ENC",
+    "quality.forecast": "Prognoza",
+    "quality.sources": "Izvori",
+    "quality.wind": "Vjetar",
+    "quality.wave": "Val",
+    "quality.current": "Struja",
+    "quality.bathymetry": "Batimetrija",
+    "quality.gps": "GPS",
+    "quality.archive": "Arhiva",
+    "quality.live": "live",
+    "quality.seed": "seed",
+    "quality.none": "nema",
+    "quality.ready": "spremno",
+    "quality.limited": "ograniceno",
+    "quality.offline": "offline",
+    "quality.officialHold": "sluzbena karta hold",
+    "quality.currentCap": "obalna struja cap",
+    "chart.initial": "Slojevi: OSM/Esri baza, OpenSeaMap oznake, EMODnet dubina/linije.",
+    "chart.unavailable": "Live karta nije dostupna; koristi se prognozni fallback.",
+    "chart.dataState": "{summary}. Sluzbene ENC/HHI karte nisu ukljucene.",
+    "chart.status": "Karta {base} {frame}: pouzdanost {confidence}/100 | slojevi {layers} | vjetar {wind} kn | val {wave} | dubina/plicine su kontekst planiranja",
+    "chart.depthQuery": "Upit dubine...",
+    "chart.depthFailed": "Upit dubine nije uspio; slojevi ostaju kontekst planiranja."
+  }
+};
 
 const ROUTE_COORDS = [
   [43.5081, 16.4402],
@@ -81,6 +331,8 @@ const SHOAL_ZONES = [
 
 const state = {
   location: { ...DEFAULT_LOCATION },
+  language: readInitialLanguage(),
+  gpsLabelKey: "gps.idle",
   mapMode: "chart",
   baseMode: "nautical",
   selectedFrame: 0,
@@ -101,6 +353,7 @@ const el = {
   chartMap: document.getElementById("chartMap"),
   weatherMap: document.getElementById("weatherMap"),
   chartStatus: document.getElementById("chartStatus"),
+  languageButtons: document.querySelectorAll("[data-language]"),
   placeTitle: document.getElementById("placeTitle"),
   gpsButton: document.getElementById("gpsButton"),
   globalConfidence: document.getElementById("globalConfidence"),
@@ -117,6 +370,7 @@ const el = {
   timelineButtons: document.getElementById("timelineButtons"),
   timelineSlider: document.getElementById("timelineSlider"),
   sourceHealth: document.getElementById("sourceHealth"),
+  qualityDashboard: document.getElementById("qualityDashboard"),
   calculationBox: document.getElementById("calculationBox"),
   windLayer: document.getElementById("windLayer"),
   currentLayer: document.getElementById("currentLayer"),
@@ -129,6 +383,7 @@ init();
 
 async function init() {
   registerServiceWorker();
+  applyI18n();
   buildTimelineControls();
   wireControls();
   initChartMap();
@@ -142,12 +397,64 @@ function registerServiceWorker() {
   }
 }
 
+function readInitialLanguage() {
+  try {
+    const stored = localStorage.getItem(LANGUAGE_KEY);
+    if (stored && I18N[stored]) return stored;
+  } catch {
+    // Local storage can be blocked in private contexts; fall back to browser language.
+  }
+  const browserLanguage = (navigator.language || "en").slice(0, 2).toLowerCase();
+  return I18N[browserLanguage] ? browserLanguage : "en";
+}
+
+function t(key) {
+  return I18N[state.language]?.[key] || I18N.en[key] || key;
+}
+
+function formatText(key, values) {
+  return t(key).replace(/\{([a-zA-Z0-9_]+)\}/g, (_, name) => String(values[name] ?? ""));
+}
+
+function setLanguage(language) {
+  if (!I18N[language]) return;
+  state.language = language;
+  try {
+    localStorage.setItem(LANGUAGE_KEY, language);
+  } catch {
+    // Persisting language is best-effort only.
+  }
+  applyI18n();
+  buildTimelineControls();
+  state.frames = state.frames.map((frame, index) => ({
+    ...frame,
+    label: timelineLabel(TIMELINE[index] || TIMELINE[0])
+  }));
+  renderFrame();
+}
+
+function applyI18n() {
+  document.documentElement.lang = state.language;
+  document.querySelectorAll("[data-i18n]").forEach((node) => {
+    node.textContent = t(node.dataset.i18n);
+  });
+  el.languageButtons.forEach((button) => {
+    button.dataset.active = String(button.dataset.language === state.language);
+  });
+  updateGpsState(state.gpsLabelKey || "gps.idle");
+  updateChartStatus(state.frames[state.selectedFrame]);
+}
+
+function timelineLabel(item) {
+  return t(`timeline.${item.key}`) || item.label;
+}
+
 function buildTimelineControls() {
   el.timelineButtons.replaceChildren();
   TIMELINE.forEach((frame, index) => {
     const button = document.createElement("button");
     button.type = "button";
-    button.textContent = frame.label;
+    button.textContent = timelineLabel(frame);
     button.dataset.index = String(index);
     button.setAttribute("aria-pressed", String(index === state.selectedFrame));
     button.addEventListener("click", () => selectFrame(index));
@@ -159,6 +466,9 @@ function wireControls() {
   el.timelineSlider.max = String(TIMELINE.length - 1);
   el.timelineSlider.addEventListener("input", () => selectFrame(Number(el.timelineSlider.value)));
   el.gpsButton.addEventListener("click", useGps);
+  el.languageButtons.forEach((button) => {
+    button.addEventListener("click", () => setLanguage(button.dataset.language));
+  });
   document.querySelectorAll("[data-map-mode]").forEach((button) => {
     button.addEventListener("click", () => setMapMode(button.dataset.mapMode));
   });
@@ -197,39 +507,40 @@ async function loadForecast() {
   const weatherPayload = weatherResult.status === "fulfilled" ? weatherResult.value : null;
   const marinePayload = marineResult.status === "fulfilled" ? marineResult.value : null;
   state.forecastArchiveCount = archiveForecastSnapshot(weatherPayload, marinePayload);
-  const weather = sourceResult("Open-Meteo Weather", weatherResult);
-  const marine = sourceResult("Open-Meteo Marine", marineResult);
+  const weather = sourceResult("source.weather", weatherResult);
+  const marine = sourceResult("source.marine", marineResult);
+  const backendFusion = sourceBackendFusion(state.seed);
   const seed = state.seed ? {
-    name: "DHMZ Seed Truth",
+    nameKey: "source.seed",
     ok: true,
     mode: "seed",
     message: `Last local verification ${state.seed.run_id || "available"}`
   } : {
-    name: "DHMZ Seed Truth",
+    nameKey: "source.seed",
     ok: false,
     mode: "offline",
     message: "Seed snapshot not available"
   };
   const localArchive = {
-    name: "Local Forecast Archive",
+    nameKey: "source.archive",
     ok: state.forecastArchiveCount > 0,
     mode: "device",
     message: `${state.forecastArchiveCount} device snapshots retained from this browser`
   };
   const chart = {
-    name: "Chart Layers",
+    nameKey: "source.chart",
     ok: Boolean(state.chart?.ready),
     mode: state.chart?.ready ? "live" : "fallback",
     message: state.chart?.ready ? chartLayerSummary() : "Forecast fallback map active"
   };
   const officialChart = {
-    name: "HHI/PRIMAR Official ENC",
+    nameKey: "source.official",
     ok: false,
     mode: "licensed",
     message: "Not bundled; requires official Croatian chart license/distributor access"
   };
 
-  state.sourceHealth = [weather, marine, seed, localArchive, chart, officialChart];
+  state.sourceHealth = [weather, backendFusion, marine, seed, localArchive, chart, officialChart];
   state.frames = buildFrames(
     weatherPayload,
     marinePayload,
@@ -243,7 +554,7 @@ function initChartMap() {
   if (!window.L || !el.chartMap) {
     state.chart = { ready: false };
     setMapMode("forecast");
-    updateChartStatus(null, "Live chart library unavailable; using forecast fallback.");
+    updateChartStatus(null, t("chart.unavailable"));
     return;
   }
 
@@ -451,7 +762,7 @@ function chartLayerSummary() {
 
 function updateChartDataState(message) {
   if (!el.chartDataState) return;
-  el.chartDataState.textContent = message || `${chartLayerSummary()}. Official ENC/HHI charts are not bundled.`;
+  el.chartDataState.textContent = message || formatText("chart.dataState", { summary: chartLayerSummary() });
 }
 
 async function loadSeed() {
@@ -521,11 +832,25 @@ async function fetchJson(url) {
   return response.json();
 }
 
-function sourceResult(name, result) {
+function sourceResult(nameKey, result) {
   if (result.status === "fulfilled") {
-    return { name, ok: true, mode: "live", message: "Live API loaded" };
+    return { nameKey, ok: true, mode: "live", message: "Live API loaded" };
   }
-  return { name, ok: false, mode: "fallback", message: result.reason?.message || "not available" };
+  return { nameKey, ok: false, mode: "fallback", message: result.reason?.message || "not available" };
+}
+
+function sourceBackendFusion(seed) {
+  const metNoCount = Number(seed?.provider_counts?.met_no || 0);
+  const fusionCount = Number(seed?.counts?.fusion_snapshots || 0);
+  const ok = metNoCount > 0 && fusionCount > 0;
+  return {
+    nameKey: "source.backendFusion",
+    ok,
+    mode: ok ? "seed" : "offline",
+    message: ok
+      ? `Open-Meteo + MET Norway fused frames: ${fusionCount}`
+      : "Backend fusion snapshot not available"
+  };
 }
 
 function archiveForecastSnapshot(weather, marine) {
@@ -579,26 +904,31 @@ function buildFrames(weather, marine, seed) {
     const weatherPoint = pickWeather(weather, item.hours);
     const marinePoint = pickMarine(marine, item.hours);
     const fallback = pickSeed(seed, item.hours);
+    const backendFusion = pickBackendFusion(seed, item.hours);
+    const backendProviderCount = backendFusion?.providerCount || 0;
     const sources = [
       weatherPoint.sourceOk,
+      backendProviderCount >= 2,
       marinePoint.sourceOk,
       Boolean(fallback)
     ].filter(Boolean).length;
     const confidence = calculateConfidence({
       weatherOk: weatherPoint.sourceOk,
+      backendProviderCount,
       marineOk: marinePoint.sourceOk,
       seedOk: Boolean(fallback),
       leadHours: item.hours
     });
     return {
-      label: item.label,
+      label: timelineLabel(item),
       hours: item.hours,
       weather: weatherPoint,
       marine: marinePoint,
       fallback,
+      backendFusion,
       sources,
       confidence,
-      condition: describeCondition(weatherPoint, marinePoint, confidence)
+      conditionKey: describeConditionKey(weatherPoint, marinePoint, confidence)
     };
   });
 }
@@ -664,6 +994,22 @@ function pickSeed(seed, leadHours) {
   return scored[0]?.item || null;
 }
 
+function pickBackendFusion(seed, leadHours) {
+  const frames = seed?.timeline_fusion;
+  if (!Array.isArray(frames) || frames.length === 0) return null;
+  const best = frames
+    .map((frame) => ({ frame, distance: Math.abs(Number(frame.lead_hours || 0) - leadHours) }))
+    .sort((a, b) => a.distance - b.distance)[0]?.frame;
+  if (!best?.values) return null;
+  return {
+    leadHours: Number(best.lead_hours || leadHours),
+    providerCount: Number(best.provider_count || 0),
+    providers: Array.isArray(best.providers) ? best.providers : [],
+    confidence: best.confidence,
+    values: best.values
+  };
+}
+
 function closestHourlyIndex(times, leadHours) {
   if (!Array.isArray(times) || times.length === 0) return -1;
   const target = Date.now() + leadHours * 3600 * 1000;
@@ -704,12 +1050,13 @@ function fallbackMarine() {
   };
 }
 
-function calculateConfidence({ weatherOk, marineOk, seedOk, leadHours }) {
-  const sourceScore = (weatherOk ? 20 : 0) + (marineOk ? 20 : 0) + (seedOk ? 10 : 0);
+function calculateConfidence({ weatherOk, backendProviderCount = 0, marineOk, seedOk, leadHours }) {
+  const backendScore = backendProviderCount >= 2 ? 16 : backendProviderCount > 0 ? 8 : 0;
+  const sourceScore = (weatherOk ? 18 : 0) + backendScore + (marineOk ? 18 : 0) + (seedOk ? 10 : 0);
   const leadPenalty = Math.min(18, Math.max(0, leadHours - 6) * 0.55);
   const truthBonus = seedOk ? 8 : 0;
   const score = Math.round(42 + sourceScore + truthBonus - leadPenalty);
-  let cap = 72;
+  let cap = backendProviderCount >= 2 ? 78 : 72;
   if (!weatherOk || !marineOk) cap = Math.min(cap, 55);
   if (!seedOk) cap = Math.min(cap, 60);
   if (leadHours >= 24) cap = Math.min(cap, 56);
@@ -729,14 +1076,14 @@ function currentFusionWeights(frame) {
   );
 }
 
-function describeCondition(weather, marine, confidence) {
+function describeConditionKey(weather, marine, confidence) {
   const windKn = kmhToKnots(weather.windSpeedKmh);
   const wave = marine.waveHeight;
-  if (confidence < 45) return "Trend only - verify before departure";
-  if (windKn !== null && windKn >= 24) return "Wind window is demanding";
-  if (wave !== null && wave >= 1.2) return "Wave comfort is reduced";
-  if (windKn !== null && wave !== null) return "Usable sailing window";
-  return "Partial forecast coverage";
+  if (confidence < 45) return "condition.trend";
+  if (windKn !== null && windKn >= 24) return "condition.wind";
+  if (wave !== null && wave >= 1.2) return "condition.wave";
+  if (windKn !== null && wave !== null) return "condition.usable";
+  return "condition.partial";
 }
 
 function selectFrame(index) {
@@ -755,18 +1102,19 @@ function renderFrame() {
   const currentKn = kmhToKnots(frame.marine.currentVelocityKmh);
 
   el.placeTitle.textContent = state.location.routeName || state.location.name;
-  el.frameLabel.textContent = `${frame.label} frame`;
-  el.conditionText.textContent = frame.condition;
+  el.frameLabel.textContent = `${frame.label} ${t("frame.suffix")}`;
+  el.conditionText.textContent = t(frame.conditionKey || "condition.loading");
   el.windMetric.textContent = windKn === null ? "--" : `${dirText(frame.weather.windDirection)} ${windKn} kn`;
   el.waveMetric.textContent = valueText(frame.marine.waveHeight, "m", 1);
   el.currentMetric.textContent = currentKn === null ? "--" : `${dirText(frame.marine.currentDirection)} ${currentKn} kn`;
   el.seaMetric.textContent = valueText(frame.marine.seaSurfaceTemperature, "C", 1);
   el.globalConfidence.textContent = String(frame.confidence);
   el.sourceCount.textContent = String(frame.sources);
-  el.freshnessState.textContent = frame.weather.sourceOk || frame.marine.sourceOk ? "live" : "seed";
-  el.truthState.textContent = frame.fallback ? "seed" : "none";
+  el.freshnessState.textContent = frame.weather.sourceOk || frame.marine.sourceOk ? t("quality.live") : t("quality.seed");
+  el.truthState.textContent = frame.fallback ? t("quality.seed") : t("quality.none");
 
   renderSourceHealth();
+  renderQualityDashboard(frame);
   renderCalculation(frame);
   renderVectors(frame);
   updateChart(frame);
@@ -778,7 +1126,8 @@ function renderSourceHealth() {
     const row = document.createElement("div");
     row.className = "source-row";
     const text = document.createElement("div");
-    text.innerHTML = `<b>${source.name}</b><span>${source.message}</span>`;
+    const name = source.nameKey ? t(source.nameKey) : source.name;
+    text.innerHTML = `<b>${escapeHtml(name)}</b><span>${escapeHtml(source.message)}</span>`;
     const pill = document.createElement("span");
     pill.className = `pill ${source.ok ? "" : "warn"}`;
     pill.textContent = source.mode;
@@ -787,22 +1136,122 @@ function renderSourceHealth() {
   });
 }
 
+function renderQualityDashboard(frame) {
+  if (!el.qualityDashboard || !frame) return;
+  el.qualityDashboard.replaceChildren();
+
+  const summary = document.createElement("div");
+  summary.className = "quality-summary";
+  [
+    [t("quality.forecast"), `${frame.confidence}/100`],
+    [t("quality.sources"), `${frame.sources}/4`],
+    [t("quality.gps"), state.location.id === "gps" ? t("quality.live") : t("quality.limited")],
+    [t("quality.archive"), String(state.forecastArchiveCount)]
+  ].forEach(([label, value]) => {
+    const chip = document.createElement("div");
+    chip.className = "quality-chip";
+    const strong = document.createElement("b");
+    strong.textContent = value;
+    const caption = document.createElement("span");
+    caption.textContent = label;
+    chip.append(strong, caption);
+    summary.append(chip);
+  });
+
+  el.qualityDashboard.append(summary);
+  qualityRows(frame).forEach((row) => {
+    el.qualityDashboard.append(qualityMeter(row));
+  });
+}
+
+function qualityRows(frame) {
+  return [
+    {
+      label: t("quality.wind"),
+      value: variableQuality(frame.weather.sourceOk, Boolean(frame.fallback), frame.hours, 85),
+      detail: frame.weather.sourceOk ? t("quality.live") : t("quality.seed")
+    },
+    {
+      label: t("quality.wave"),
+      value: variableQuality(frame.marine.sourceOk, false, frame.hours, 65),
+      detail: frame.marine.sourceOk ? t("quality.live") : t("quality.limited")
+    },
+    {
+      label: t("quality.current"),
+      value: frame.marine.sourceOk ? Math.min(45, variableQuality(true, false, frame.hours, 55)) : 20,
+      detail: t("quality.currentCap")
+    },
+    {
+      label: t("quality.bathymetry"),
+      value: chartLayerQuality(),
+      detail: t("quality.officialHold")
+    }
+  ];
+}
+
+function variableQuality(sourceOk, seedOk, leadHours, cap) {
+  const sourceScore = (sourceOk ? 62 : 18) + (seedOk ? 12 : 0);
+  const leadPenalty = Math.min(22, Math.max(0, leadHours - 6) * 0.7);
+  return Math.max(12, Math.min(cap, Math.round(sourceScore - leadPenalty)));
+}
+
+function chartLayerQuality() {
+  if (!state.chart?.ready) return 20;
+  const entries = Object.values(state.chartLayerHealth);
+  if (!entries.length) return 65;
+  const failed = entries.filter((entry) => !entry.ok).length;
+  return Math.max(35, 92 - failed * 14);
+}
+
+function qualityMeter(row) {
+  const value = Math.max(0, Math.min(100, Number(row.value) || 0));
+  const wrapper = document.createElement("div");
+  wrapper.className = "quality-row";
+  const label = document.createElement("div");
+  const strong = document.createElement("b");
+  strong.textContent = row.label;
+  const detail = document.createElement("span");
+  detail.textContent = row.detail;
+  label.append(strong, detail);
+
+  const track = document.createElement("div");
+  track.className = "quality-track";
+  const fill = document.createElement("span");
+  fill.className = `quality-fill ${qualityBand(value)}`;
+  fill.style.width = `${value}%`;
+  track.append(fill);
+
+  const score = document.createElement("small");
+  score.textContent = `${value}/100`;
+  wrapper.append(label, track, score);
+  return wrapper;
+}
+
+function qualityBand(value) {
+  if (value < 45) return "bad";
+  if (value < 62) return "warn";
+  return "";
+}
+
 function renderCalculation(frame) {
   const windKn = kmhToKnots(frame.weather.windSpeedKmh);
   const weights = currentFusionWeights(frame);
+  const backend = backendFusionLines(frame.backendFusion);
   const sourceLine = `source_count=${frame.sources}, lead=${frame.hours}h`;
-  const capLine = frame.sources < 2 ? "cap=60 because fewer than two independent live forecast sources" : "cap=72 prototype cap";
+  const capLine = frame.sources < 2 ? "cap=60 because fewer than two independent live forecast sources" : "cap=78 prototype cap with backend provider fusion";
   const weatherLine = `wind=${windKn ?? "na"}kn, temp=${frame.weather.temperature ?? "na"}C`;
   const marineLine = `wave=${frame.marine.waveHeight ?? "na"}m, current=${kmhToKnots(frame.marine.currentVelocityKmh) ?? "na"}kn`;
   const chartLine = `chart=${state.baseMode}, depth=EMODnet, seamarks=OpenSeaMap, satellite=Esri, official_enc=not_bundled`;
   const archiveLine = `archive=${state.forecastArchiveCount}/${MAX_LOCAL_ARCHIVE_SNAPSHOTS} local forecast snapshots`;
   const weightLine = `weights weather=${weights.weather}, marine=${weights.marine}, seed=${weights.seed}`;
-  const confidenceLine = `confidence=${frame.confidence}/100, mode=${frame.condition}`;
+  const confidenceLine = `confidence=${frame.confidence}/100, mode=${t(frame.conditionKey || "condition.loading")}`;
   el.calculationBox.textContent = [
     sourceLine,
     capLine,
     weatherLine,
     marineLine,
+    backend.summary,
+    ...backend.variables,
     chartLine,
     archiveLine,
     weightLine,
@@ -813,6 +1262,39 @@ function renderCalculation(frame) {
     "loss = EWMA(abs(corrected-observed)/scale)",
     "weight = prior*freshness*availability*diversity*exp(-lambda*loss)"
   ].join("\n");
+}
+
+function backendFusionLines(backendFusion) {
+  if (!backendFusion?.values) {
+    return {
+      summary: "backend_fusion=not_available",
+      variables: []
+    };
+  }
+  const providers = backendFusion.providers?.length ? backendFusion.providers.join("+") : "unknown";
+  const summary = `backend_fusion providers=${providers}, confidence=${backendFusion.confidence ?? "na"}/100`;
+  const variables = ["wind_speed_10m", "wind_direction_10m", "temperature_2m", "pressure_msl"]
+    .map((variable) => backendFusionVariableLine(variable, backendFusion.values[variable]))
+    .filter(Boolean);
+  return { summary, variables };
+}
+
+function backendFusionVariableLine(variable, item) {
+  if (!item) return "";
+  const value = item.value ?? "na";
+  const unit = item.unit || "";
+  const providerValues = Array.isArray(item.provider_values) ? item.provider_values : [];
+  const weights = item.weights && typeof item.weights === "object" ? item.weights : {};
+  const providerLine = providerValues
+    .map((providerValue) => {
+      const provider = providerValue.provider || "provider";
+      const providerUnit = providerValue.unit || unit;
+      return `${provider}:${providerValue.value}${providerUnit}`;
+    })
+    .join(",");
+  const weightLine = Object.entries(weights).map(([name, weight]) => `${name}=${weight}`).join(",");
+  const suffix = variable === "wind_speed_10m" && unit === "m/s" ? ` (${mpsToKnots(value) ?? "na"}kn)` : "";
+  return `fusion.${variable}=${value}${unit}${suffix} providers=[${providerLine}] weights=[${weightLine}]`;
 }
 
 function renderVectors(frame) {
@@ -853,7 +1335,7 @@ function updateChart(frame) {
   const confidenceColor = frame.confidence < 48 ? "#e65b4f" : frame.confidence < 60 ? "#c67b2e" : "#2f8a6f";
   accuracyCircle.setStyle({ color: confidenceColor, fillColor: confidenceColor });
   positionMarker.bindTooltip(
-    `<b>${state.location.routeName || state.location.name}</b><br>${frame.label}: ${frame.condition}<br>Wave ${valueText(frame.marine.waveHeight, "m", 1)}`
+    `<b>${state.location.routeName || state.location.name}</b><br>${frame.label}: ${escapeHtml(t(frame.conditionKey || "condition.loading"))}<br>Wave ${valueText(frame.marine.waveHeight, "m", 1)}`
   );
   if (!map.getBounds().pad(-0.18).contains(center)) {
     map.setView(center, Math.max(map.getZoom(), 10), { animate: false });
@@ -867,7 +1349,7 @@ async function queryDepthAt(latlng) {
   const map = state.chart.map;
   const popup = L.popup({ closeButton: true, autoPan: true })
     .setLatLng(latlng)
-    .setContent("Depth query...")
+    .setContent(t("chart.depthQuery"))
     .openOn(map);
   try {
     const response = await fetch(buildDepthInfoUrl(latlng), { cache: "no-store" });
@@ -889,7 +1371,7 @@ async function queryDepthAt(latlng) {
       escapeHtml(error.message || "No point value returned"),
       "<small>Keep depth/contour layers as visual planning context only.</small>"
     ].join("<br>"));
-    updateChartDataState("Depth point query failed; map layers remain visual planning context.");
+    updateChartDataState(t("chart.depthFailed"));
   }
 }
 
@@ -979,7 +1461,7 @@ function updateChartStatus(frame, override) {
     return;
   }
   if (!frame) {
-    el.chartStatus.textContent = "Chart layers: OSM/Esri base, OpenSeaMap seamarks, EMODnet depth/contours.";
+    el.chartStatus.textContent = t("chart.initial");
     return;
   }
   const windKn = kmhToKnots(frame.weather.windSpeedKmh);
@@ -990,13 +1472,14 @@ function updateChartStatus(frame, override) {
       .filter((name) => !["streetBase", "satelliteBase"].includes(name))
       .join("/")
     : "na";
-  el.chartStatus.textContent = [
-    `Map ${state.baseMode} ${frame.label}: confidence ${frame.confidence}/100`,
-    `layers ${activeLayers || "base"}`,
-    `wind ${windKn ?? "--"} kn`,
-    `wave ${valueText(frame.marine.waveHeight, "m", 1)}`,
-    "depth/shallows are planning context"
-  ].join(" | ");
+  el.chartStatus.textContent = formatText("chart.status", {
+    base: state.baseMode,
+    frame: frame.label,
+    confidence: frame.confidence,
+    layers: activeLayers || "base",
+    wind: windKn ?? "--",
+    wave: valueText(frame.marine.waveHeight, "m", 1)
+  });
   updateChartDataState();
 }
 
@@ -1012,24 +1495,24 @@ function vectorPath(x, y, directionDegrees, length, className) {
 
 function useGps() {
   if (!navigator.geolocation) {
-    updateGpsState("GPS unavailable");
+    updateGpsState("gps.unavailable");
     return;
   }
   if (state.gpsWatchId !== null) {
     navigator.geolocation.clearWatch(state.gpsWatchId);
     state.gpsWatchId = null;
-    updateGpsState("GPS");
+    updateGpsState("gps.idle");
     return;
   }
-  updateGpsState("GPS...");
+  updateGpsState("gps.loading");
   navigator.geolocation.getCurrentPosition(
     (position) => applyGpsPosition(position, true),
-    () => updateGpsState("GPS blocked"),
+    () => updateGpsState("gps.blocked"),
     { enableHighAccuracy: true, timeout: 6000, maximumAge: 0 }
   );
   state.gpsWatchId = navigator.geolocation.watchPosition(
     (position) => applyGpsPosition(position, false),
-    () => updateGpsState("GPS blocked"),
+    () => updateGpsState("gps.blocked"),
     { enableHighAccuracy: true, timeout: 12000, maximumAge: 5000 }
   );
 }
@@ -1054,7 +1537,7 @@ async function applyGpsPosition(position, forceReload) {
     state.chart.accuracyCircle.setRadius(Math.max(25, Math.min(1500, accuracy)));
     state.chart.map.setView([latitude, longitude], Math.max(state.chart.map.getZoom(), 12));
   }
-  updateGpsState("GPS live");
+  updateGpsState("gps.live");
   if (shouldReload) {
     state.lastGpsForecastAt = Date.now();
     state.lastGpsForecastLocation = { latitude, longitude };
@@ -1083,8 +1566,11 @@ function distanceMeters(a, b) {
   return 2 * radiusM * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h));
 }
 
-function updateGpsState(text) {
+function updateGpsState(keyOrText) {
   if (!el.gpsButton) return;
+  const isKey = Boolean(I18N.en[keyOrText]);
+  state.gpsLabelKey = isKey ? keyOrText : null;
+  const text = isKey ? t(keyOrText) : keyOrText;
   const dot = document.createElement("span");
   dot.className = "gps-dot";
   dot.setAttribute("aria-hidden", "true");
@@ -1098,9 +1584,10 @@ function renderLoadingState() {
     weather: fallbackWeather(),
     marine: fallbackMarine(),
     fallback: null,
+    backendFusion: null,
     sources: 0,
     confidence: 20,
-    condition: "Loading forecast"
+    conditionKey: "condition.loading"
   }));
   selectFrame(0);
 }
@@ -1113,6 +1600,11 @@ function asNumber(value) {
 function kmhToKnots(value) {
   if (value === null || value === undefined) return null;
   return Math.round(Number(value) * 0.539957);
+}
+
+function mpsToKnots(value) {
+  if (value === null || value === undefined || Number.isNaN(Number(value))) return null;
+  return Math.round(Number(value) * 1.943844);
 }
 
 function valueText(value, unit, digits) {
