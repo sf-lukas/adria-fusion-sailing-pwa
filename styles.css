@@ -144,6 +144,7 @@ h2 {
 }
 
 .map-card[data-mode="chart"] .layer-bar,
+.map-card[data-mode="chart"] .forecast-map,
 .map-card[data-mode="forecast"] .base-layer-bar,
 .map-card[data-mode="forecast"] .chart-layer-bar,
 .map-card[data-mode="forecast"] .depth-legend,
@@ -155,7 +156,7 @@ h2 {
   position: absolute;
   top: 10px;
   left: 10px;
-  z-index: 12;
+  z-index: 1100;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 78px));
   gap: 6px;
@@ -185,7 +186,7 @@ h2 {
   top: 50px;
   left: 10px;
   right: 10px;
-  z-index: 12;
+  z-index: 1100;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 6px;
@@ -196,7 +197,7 @@ h2 {
   top: 50px;
   left: 10px;
   right: 10px;
-  z-index: 8;
+  z-index: 1100;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 6px;
@@ -222,7 +223,7 @@ h2 {
   top: 90px;
   left: 10px;
   right: 10px;
-  z-index: 12;
+  z-index: 1100;
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 6px;
@@ -232,7 +233,7 @@ h2 {
   position: absolute;
   top: 132px;
   right: 10px;
-  z-index: 12;
+  z-index: 1100;
   display: grid;
   gap: 4px;
   width: 108px;
@@ -278,6 +279,7 @@ h2 {
 }
 
 .chart-map {
+  position: relative;
   z-index: 1;
   background: #b7d6da;
 }
@@ -418,7 +420,7 @@ svg.forecast-map {
   left: 10px;
   right: 10px;
   bottom: 10px;
-  z-index: 8;
+  z-index: 1100;
   display: grid;
   gap: 10px;
   padding: 12px;
