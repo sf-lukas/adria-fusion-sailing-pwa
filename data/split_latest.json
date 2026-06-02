@@ -1,7 +1,7 @@
 {
   "schema_version": "croatia_weather_fusion_snapshot_v1",
-  "run_id": "split-20260602T184218Z",
-  "generated_at": "2026-06-02T18:42:18.776232+00:00",
+  "run_id": "split-20260602T191316Z",
+  "generated_at": "2026-06-02T19:13:16.571020+00:00",
   "location": {
     "id": "split",
     "name": "Split",
@@ -18,17 +18,17 @@
     "dhmz_cap": "https://meteo.hr/upozorenja/cap_hr_today.xml"
   },
   "counts": {
-    "forecast_snapshots": 1189,
+    "forecast_snapshots": 1181,
     "weather_forecast_snapshots": 101,
-    "met_no_forecast_snapshots": 648,
+    "met_no_forecast_snapshots": 640,
     "marine_forecast_snapshots": 440,
-    "fusion_snapshots": 500,
-    "observations": 520,
+    "fusion_snapshots": 498,
+    "observations": 392,
     "warnings": 8
   },
   "provider_counts": {
     "open_meteo": 101,
-    "met_no": 648,
+    "met_no": 640,
     "open_meteo_marine": 440
   },
   "source_health": [
@@ -42,7 +42,7 @@
       "source": "met_no",
       "ok": true,
       "url": "https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=43.5081&lon=16.4402",
-      "message": "648 snapshots"
+      "message": "640 snapshots"
     },
     {
       "source": "open_meteo_marine",
@@ -54,7 +54,7 @@
       "source": "dhmz_observations",
       "ok": true,
       "url": "https://vrijeme.hr/hrvatska_n.xml",
-      "message": "520 rows"
+      "message": "392 rows"
     },
     {
       "source": "dhmz_cap",
@@ -65,8 +65,8 @@
   ],
   "source_errors": [],
   "archive_counts": {
-    "forecast_snapshots": 1189,
-    "observations": 520,
+    "forecast_snapshots": 1181,
+    "observations": 392,
     "warnings": 8,
     "verifications": 1
   },
@@ -77,13 +77,13 @@
     "provider": "open_meteo",
     "truth_source": "dhmz",
     "truth_station": "Split-Marjan",
-    "valid_at": "2026-06-02T20:30:00+02:00",
-    "observed_at": "2026-06-02T20:00:00+02:00",
-    "forecast_value": 22.5,
+    "valid_at": "2026-06-02T21:00:00+02:00",
+    "observed_at": "2026-06-02T21:00:00+02:00",
+    "forecast_value": 22.1,
     "observation_value": 22.6,
     "unit": "°C",
-    "error": -0.1,
-    "absolute_error": 0.1,
+    "error": -0.5,
+    "absolute_error": 0.5,
     "station_distance_km": 1.145,
     "notes": [
       "temperature_only_first_slice"
@@ -92,7 +92,7 @@
   "timeline_fusion": [
     {
       "lead_hours": 0,
-      "target_at": "2026-06-02T18:42:18.776232+00:00",
+      "target_at": "2026-06-02T19:13:16.571020+00:00",
       "provider_count": 2,
       "providers": [
         "met_no",
@@ -101,17 +101,17 @@
       "confidence": 60,
       "values": {
         "temperature_2m": {
-          "value": 22.5,
+          "value": 22.1,
           "unit": "°C",
           "confidence": 54,
           "valid_at": "2026-06-02T19:00:00+00:00",
           "provider_values": [
             {
               "provider": "open_meteo",
-              "value": 22.5,
+              "value": 22.1,
               "unit": "°C",
-              "lead_hours": -0.205,
-              "payload_hash": "d2fc3614d8b76269a48752df28740c7fc23728c3ed426e197dd4f39dbd2b4cb0"
+              "lead_hours": -0.221,
+              "payload_hash": "0b5504faf584ac3a36df5530b480cd6da9a095fc754ccb99c5ca7e356fd335dc"
             }
           ],
           "weights": {
@@ -124,24 +124,24 @@
           ]
         },
         "relative_humidity_2m": {
-          "value": 62.75,
+          "value": 64.25,
           "unit": "%",
           "confidence": 68,
           "valid_at": "2026-06-02T19:00:00+00:00",
           "provider_values": [
             {
               "provider": "open_meteo",
-              "value": 65,
+              "value": 68,
               "unit": "%",
-              "lead_hours": -0.205,
-              "payload_hash": "d2fc3614d8b76269a48752df28740c7fc23728c3ed426e197dd4f39dbd2b4cb0"
+              "lead_hours": -0.221,
+              "payload_hash": "0b5504faf584ac3a36df5530b480cd6da9a095fc754ccb99c5ca7e356fd335dc"
             },
             {
               "provider": "met_no",
               "value": 60.5,
               "unit": "%",
               "lead_hours": 1.766,
-              "payload_hash": "7ab9a9d489c4a3052f5c93ca584ce7d69cf20a29e97ef415609f139266ff8187"
+              "payload_hash": "7f8e2b4195b67b2ffd34e37fbcfb7633b4cde9589c6ed2958b61dc39fbfd0b59"
             }
           ],
           "weights": {
@@ -154,24 +154,24 @@
           ]
         },
         "wind_speed_10m": {
-          "value": 1.35,
+          "value": 1.405,
           "unit": "m/s",
           "confidence": 68,
           "valid_at": "2026-06-02T19:00:00+00:00",
           "provider_values": [
             {
               "provider": "open_meteo",
-              "value": 0.5,
+              "value": 0.611,
               "unit": "m/s",
-              "lead_hours": -0.205,
-              "payload_hash": "d2fc3614d8b76269a48752df28740c7fc23728c3ed426e197dd4f39dbd2b4cb0"
+              "lead_hours": -0.221,
+              "payload_hash": "0b5504faf584ac3a36df5530b480cd6da9a095fc754ccb99c5ca7e356fd335dc"
             },
             {
               "provider": "met_no",
               "value": 2.2,
               "unit": "m/s",
               "lead_hours": 1.766,
-              "payload_hash": "7ab9a9d489c4a3052f5c93ca584ce7d69cf20a29e97ef415609f139266ff8187"
+              "payload_hash": "7f8e2b4195b67b2ffd34e37fbcfb7633b4cde9589c6ed2958b61dc39fbfd0b59"
             }
           ],
           "weights": {
@@ -184,17 +184,17 @@
           ]
         },
         "wind_direction_10m": {
-          "value": 11.0,
+          "value": 0.0,
           "unit": "°",
           "confidence": 54,
           "valid_at": "2026-06-02T19:00:00+00:00",
           "provider_values": [
             {
               "provider": "open_meteo",
-              "value": 11,
+              "value": 360,
               "unit": "°",
-              "lead_hours": -0.205,
-              "payload_hash": "d2fc3614d8b76269a48752df28740c7fc23728c3ed426e197dd4f39dbd2b4cb0"
+              "lead_hours": -0.221,
+              "payload_hash": "0b5504faf584ac3a36df5530b480cd6da9a095fc754ccb99c5ca7e356fd335dc"
             }
           ],
           "weights": {
@@ -217,7 +217,7 @@
               "value": 1011.9,
               "unit": "hPa",
               "lead_hours": 1.766,
-              "payload_hash": "7ab9a9d489c4a3052f5c93ca584ce7d69cf20a29e97ef415609f139266ff8187"
+              "payload_hash": "7f8e2b4195b67b2ffd34e37fbcfb7633b4cde9589c6ed2958b61dc39fbfd0b59"
             }
           ],
           "weights": {
@@ -233,7 +233,7 @@
     },
     {
       "lead_hours": 1,
-      "target_at": "2026-06-02T19:42:18.776232+00:00",
+      "target_at": "2026-06-02T20:13:16.571020+00:00",
       "provider_count": 2,
       "providers": [
         "met_no",
@@ -251,8 +251,8 @@
               "provider": "open_meteo",
               "value": 21.6,
               "unit": "°C",
-              "lead_hours": 1.295,
-              "payload_hash": "d2fc3614d8b76269a48752df28740c7fc23728c3ed426e197dd4f39dbd2b4cb0"
+              "lead_hours": 0.779,
+              "payload_hash": "0b5504faf584ac3a36df5530b480cd6da9a095fc754ccb99c5ca7e356fd335dc"
             }
           ],
           "weights": {
@@ -275,7 +275,7 @@
               "value": 65.1,
               "unit": "%",
               "lead_hours": 2.766,
-              "payload_hash": "7ab9a9d489c4a3052f5c93ca584ce7d69cf20a29e97ef415609f139266ff8187"
+              "payload_hash": "7f8e2b4195b67b2ffd34e37fbcfb7633b4cde9589c6ed2958b61dc39fbfd0b59"
             }
           ],
           "weights": {
@@ -297,15 +297,15 @@
               "provider": "open_meteo",
               "value": 0.361,
               "unit": "m/s",
-              "lead_hours": 1.295,
-              "payload_hash": "d2fc3614d8b76269a48752df28740c7fc23728c3ed426e197dd4f39dbd2b4cb0"
+              "lead_hours": 0.779,
+              "payload_hash": "0b5504faf584ac3a36df5530b480cd6da9a095fc754ccb99c5ca7e356fd335dc"
             },
             {
               "provider": "met_no",
               "value": 2.1,
               "unit": "m/s",
               "lead_hours": 2.766,
-              "payload_hash": "7ab9a9d489c4a3052f5c93ca584ce7d69cf20a29e97ef415609f139266ff8187"
+              "payload_hash": "7f8e2b4195b67b2ffd34e37fbcfb7633b4cde9589c6ed2958b61dc39fbfd0b59"
             }
           ],
           "weights": {
@@ -327,8 +327,8 @@
               "provider": "open_meteo",
               "value": 326,
               "unit": "°",
-              "lead_hours": 1.295,
-              "payload_hash": "d2fc3614d8b76269a48752df28740c7fc23728c3ed426e197dd4f39dbd2b4cb0"
+              "lead_hours": 0.779,
+              "payload_hash": "0b5504faf584ac3a36df5530b480cd6da9a095fc754ccb99c5ca7e356fd335dc"
             }
           ],
           "weights": {
@@ -351,7 +351,7 @@
               "value": 1012.1,
               "unit": "hPa",
               "lead_hours": 2.766,
-              "payload_hash": "7ab9a9d489c4a3052f5c93ca584ce7d69cf20a29e97ef415609f139266ff8187"
+              "payload_hash": "7f8e2b4195b67b2ffd34e37fbcfb7633b4cde9589c6ed2958b61dc39fbfd0b59"
             }
           ],
           "weights": {
@@ -367,7 +367,7 @@
     },
     {
       "lead_hours": 3,
-      "target_at": "2026-06-02T21:42:18.776232+00:00",
+      "target_at": "2026-06-02T22:13:16.571020+00:00",
       "provider_count": 1,
       "providers": [
         "met_no"
@@ -385,7 +385,7 @@
               "value": 21.3,
               "unit": "degC",
               "lead_hours": 4.766,
-              "payload_hash": "7ab9a9d489c4a3052f5c93ca584ce7d69cf20a29e97ef415609f139266ff8187"
+              "payload_hash": "7f8e2b4195b67b2ffd34e37fbcfb7633b4cde9589c6ed2958b61dc39fbfd0b59"
             }
           ],
           "weights": {
@@ -408,7 +408,7 @@
               "value": 65.9,
               "unit": "%",
               "lead_hours": 4.766,
-              "payload_hash": "7ab9a9d489c4a3052f5c93ca584ce7d69cf20a29e97ef415609f139266ff8187"
+              "payload_hash": "7f8e2b4195b67b2ffd34e37fbcfb7633b4cde9589c6ed2958b61dc39fbfd0b59"
             }
           ],
           "weights": {
@@ -431,7 +431,7 @@
               "value": 4.0,
               "unit": "m/s",
               "lead_hours": 4.766,
-              "payload_hash": "7ab9a9d489c4a3052f5c93ca584ce7d69cf20a29e97ef415609f139266ff8187"
+              "payload_hash": "7f8e2b4195b67b2ffd34e37fbcfb7633b4cde9589c6ed2958b61dc39fbfd0b59"
             }
           ],
           "weights": {
@@ -454,7 +454,7 @@
               "value": 94.6,
               "unit": "degree",
               "lead_hours": 4.766,
-              "payload_hash": "7ab9a9d489c4a3052f5c93ca584ce7d69cf20a29e97ef415609f139266ff8187"
+              "payload_hash": "7f8e2b4195b67b2ffd34e37fbcfb7633b4cde9589c6ed2958b61dc39fbfd0b59"
             }
           ],
           "weights": {
@@ -477,7 +477,7 @@
               "value": 1011.8,
               "unit": "hPa",
               "lead_hours": 4.766,
-              "payload_hash": "7ab9a9d489c4a3052f5c93ca584ce7d69cf20a29e97ef415609f139266ff8187"
+              "payload_hash": "7f8e2b4195b67b2ffd34e37fbcfb7633b4cde9589c6ed2958b61dc39fbfd0b59"
             }
           ],
           "weights": {
@@ -493,7 +493,7 @@
     },
     {
       "lead_hours": 6,
-      "target_at": "2026-06-03T00:42:18.776232+00:00",
+      "target_at": "2026-06-03T01:13:16.571020+00:00",
       "provider_count": 1,
       "providers": [
         "met_no"
@@ -511,7 +511,7 @@
               "value": 19.7,
               "unit": "degC",
               "lead_hours": 7.766,
-              "payload_hash": "7ab9a9d489c4a3052f5c93ca584ce7d69cf20a29e97ef415609f139266ff8187"
+              "payload_hash": "7f8e2b4195b67b2ffd34e37fbcfb7633b4cde9589c6ed2958b61dc39fbfd0b59"
             }
           ],
           "weights": {
@@ -534,7 +534,7 @@
               "value": 83.0,
               "unit": "%",
               "lead_hours": 7.766,
-              "payload_hash": "7ab9a9d489c4a3052f5c93ca584ce7d69cf20a29e97ef415609f139266ff8187"
+              "payload_hash": "7f8e2b4195b67b2ffd34e37fbcfb7633b4cde9589c6ed2958b61dc39fbfd0b59"
             }
           ],
           "weights": {
@@ -557,7 +557,7 @@
               "value": 6.0,
               "unit": "m/s",
               "lead_hours": 7.766,
-              "payload_hash": "7ab9a9d489c4a3052f5c93ca584ce7d69cf20a29e97ef415609f139266ff8187"
+              "payload_hash": "7f8e2b4195b67b2ffd34e37fbcfb7633b4cde9589c6ed2958b61dc39fbfd0b59"
             }
           ],
           "weights": {
@@ -580,7 +580,7 @@
               "value": 96.4,
               "unit": "degree",
               "lead_hours": 7.766,
-              "payload_hash": "7ab9a9d489c4a3052f5c93ca584ce7d69cf20a29e97ef415609f139266ff8187"
+              "payload_hash": "7f8e2b4195b67b2ffd34e37fbcfb7633b4cde9589c6ed2958b61dc39fbfd0b59"
             }
           ],
           "weights": {
@@ -603,7 +603,7 @@
               "value": 1011.2,
               "unit": "hPa",
               "lead_hours": 7.766,
-              "payload_hash": "7ab9a9d489c4a3052f5c93ca584ce7d69cf20a29e97ef415609f139266ff8187"
+              "payload_hash": "7f8e2b4195b67b2ffd34e37fbcfb7633b4cde9589c6ed2958b61dc39fbfd0b59"
             }
           ],
           "weights": {
@@ -619,7 +619,7 @@
     },
     {
       "lead_hours": 12,
-      "target_at": "2026-06-03T06:42:18.776232+00:00",
+      "target_at": "2026-06-03T07:13:16.571020+00:00",
       "provider_count": 1,
       "providers": [
         "met_no"
@@ -637,7 +637,7 @@
               "value": 20.6,
               "unit": "degC",
               "lead_hours": 13.766,
-              "payload_hash": "7ab9a9d489c4a3052f5c93ca584ce7d69cf20a29e97ef415609f139266ff8187"
+              "payload_hash": "7f8e2b4195b67b2ffd34e37fbcfb7633b4cde9589c6ed2958b61dc39fbfd0b59"
             }
           ],
           "weights": {
@@ -660,7 +660,7 @@
               "value": 72.9,
               "unit": "%",
               "lead_hours": 13.766,
-              "payload_hash": "7ab9a9d489c4a3052f5c93ca584ce7d69cf20a29e97ef415609f139266ff8187"
+              "payload_hash": "7f8e2b4195b67b2ffd34e37fbcfb7633b4cde9589c6ed2958b61dc39fbfd0b59"
             }
           ],
           "weights": {
@@ -683,7 +683,7 @@
               "value": 5.7,
               "unit": "m/s",
               "lead_hours": 13.766,
-              "payload_hash": "7ab9a9d489c4a3052f5c93ca584ce7d69cf20a29e97ef415609f139266ff8187"
+              "payload_hash": "7f8e2b4195b67b2ffd34e37fbcfb7633b4cde9589c6ed2958b61dc39fbfd0b59"
             }
           ],
           "weights": {
@@ -706,7 +706,7 @@
               "value": 91.6,
               "unit": "degree",
               "lead_hours": 13.766,
-              "payload_hash": "7ab9a9d489c4a3052f5c93ca584ce7d69cf20a29e97ef415609f139266ff8187"
+              "payload_hash": "7f8e2b4195b67b2ffd34e37fbcfb7633b4cde9589c6ed2958b61dc39fbfd0b59"
             }
           ],
           "weights": {
@@ -729,7 +729,7 @@
               "value": 1009.5,
               "unit": "hPa",
               "lead_hours": 13.766,
-              "payload_hash": "7ab9a9d489c4a3052f5c93ca584ce7d69cf20a29e97ef415609f139266ff8187"
+              "payload_hash": "7f8e2b4195b67b2ffd34e37fbcfb7633b4cde9589c6ed2958b61dc39fbfd0b59"
             }
           ],
           "weights": {
@@ -745,7 +745,7 @@
     },
     {
       "lead_hours": 24,
-      "target_at": "2026-06-03T18:42:18.776232+00:00",
+      "target_at": "2026-06-03T19:13:16.571020+00:00",
       "provider_count": 1,
       "providers": [
         "met_no"
@@ -763,7 +763,7 @@
               "value": 18.4,
               "unit": "degC",
               "lead_hours": 25.766,
-              "payload_hash": "7ab9a9d489c4a3052f5c93ca584ce7d69cf20a29e97ef415609f139266ff8187"
+              "payload_hash": "7f8e2b4195b67b2ffd34e37fbcfb7633b4cde9589c6ed2958b61dc39fbfd0b59"
             }
           ],
           "weights": {
@@ -786,7 +786,7 @@
               "value": 88.4,
               "unit": "%",
               "lead_hours": 25.766,
-              "payload_hash": "7ab9a9d489c4a3052f5c93ca584ce7d69cf20a29e97ef415609f139266ff8187"
+              "payload_hash": "7f8e2b4195b67b2ffd34e37fbcfb7633b4cde9589c6ed2958b61dc39fbfd0b59"
             }
           ],
           "weights": {
@@ -809,7 +809,7 @@
               "value": 2.1,
               "unit": "m/s",
               "lead_hours": 25.766,
-              "payload_hash": "7ab9a9d489c4a3052f5c93ca584ce7d69cf20a29e97ef415609f139266ff8187"
+              "payload_hash": "7f8e2b4195b67b2ffd34e37fbcfb7633b4cde9589c6ed2958b61dc39fbfd0b59"
             }
           ],
           "weights": {
@@ -832,7 +832,7 @@
               "value": 325.0,
               "unit": "degree",
               "lead_hours": 25.766,
-              "payload_hash": "7ab9a9d489c4a3052f5c93ca584ce7d69cf20a29e97ef415609f139266ff8187"
+              "payload_hash": "7f8e2b4195b67b2ffd34e37fbcfb7633b4cde9589c6ed2958b61dc39fbfd0b59"
             }
           ],
           "weights": {
@@ -855,7 +855,7 @@
               "value": 1009.2,
               "unit": "hPa",
               "lead_hours": 25.766,
-              "payload_hash": "7ab9a9d489c4a3052f5c93ca584ce7d69cf20a29e97ef415609f139266ff8187"
+              "payload_hash": "7f8e2b4195b67b2ffd34e37fbcfb7633b4cde9589c6ed2958b61dc39fbfd0b59"
             }
           ],
           "weights": {
@@ -871,7 +871,7 @@
     },
     {
       "lead_hours": 48,
-      "target_at": "2026-06-04T18:42:18.776232+00:00",
+      "target_at": "2026-06-04T19:13:16.571020+00:00",
       "provider_count": 1,
       "providers": [
         "met_no"
@@ -889,7 +889,7 @@
               "value": 20.8,
               "unit": "degC",
               "lead_hours": 49.766,
-              "payload_hash": "7ab9a9d489c4a3052f5c93ca584ce7d69cf20a29e97ef415609f139266ff8187"
+              "payload_hash": "7f8e2b4195b67b2ffd34e37fbcfb7633b4cde9589c6ed2958b61dc39fbfd0b59"
             }
           ],
           "weights": {
@@ -912,7 +912,7 @@
               "value": 75.8,
               "unit": "%",
               "lead_hours": 49.766,
-              "payload_hash": "7ab9a9d489c4a3052f5c93ca584ce7d69cf20a29e97ef415609f139266ff8187"
+              "payload_hash": "7f8e2b4195b67b2ffd34e37fbcfb7633b4cde9589c6ed2958b61dc39fbfd0b59"
             }
           ],
           "weights": {
@@ -935,7 +935,7 @@
               "value": 1.7,
               "unit": "m/s",
               "lead_hours": 49.766,
-              "payload_hash": "7ab9a9d489c4a3052f5c93ca584ce7d69cf20a29e97ef415609f139266ff8187"
+              "payload_hash": "7f8e2b4195b67b2ffd34e37fbcfb7633b4cde9589c6ed2958b61dc39fbfd0b59"
             }
           ],
           "weights": {
@@ -958,7 +958,7 @@
               "value": 109.5,
               "unit": "degree",
               "lead_hours": 49.766,
-              "payload_hash": "7ab9a9d489c4a3052f5c93ca584ce7d69cf20a29e97ef415609f139266ff8187"
+              "payload_hash": "7f8e2b4195b67b2ffd34e37fbcfb7633b4cde9589c6ed2958b61dc39fbfd0b59"
             }
           ],
           "weights": {
@@ -981,7 +981,7 @@
               "value": 1010.5,
               "unit": "hPa",
               "lead_hours": 49.766,
-              "payload_hash": "7ab9a9d489c4a3052f5c93ca584ce7d69cf20a29e97ef415609f139266ff8187"
+              "payload_hash": "7f8e2b4195b67b2ffd34e37fbcfb7633b4cde9589c6ed2958b61dc39fbfd0b59"
             }
           ],
           "weights": {
@@ -999,9 +999,9 @@
   "sample_fusion": [
     {
       "location_id": "split",
-      "issued_at": "2026-06-02T18:42:18.776232+00:00",
+      "issued_at": "2026-06-02T19:13:16.571020+00:00",
       "valid_at": "2026-06-01T22:00:00+00:00",
-      "lead_hours": -20.705,
+      "lead_hours": -21.221,
       "variable": "temperature_2m",
       "value": 19.9,
       "unit": "°C",
@@ -1011,8 +1011,8 @@
           "provider": "open_meteo",
           "value": 19.9,
           "unit": "°C",
-          "lead_hours": -20.705,
-          "payload_hash": "d2fc3614d8b76269a48752df28740c7fc23728c3ed426e197dd4f39dbd2b4cb0"
+          "lead_hours": -21.221,
+          "payload_hash": "0b5504faf584ac3a36df5530b480cd6da9a095fc754ccb99c5ca7e356fd335dc"
         }
       ],
       "weights": {
@@ -1026,9 +1026,9 @@
     },
     {
       "location_id": "split",
-      "issued_at": "2026-06-02T18:42:18.776232+00:00",
+      "issued_at": "2026-06-02T19:13:16.571020+00:00",
       "valid_at": "2026-06-01T22:00:00+00:00",
-      "lead_hours": -20.705,
+      "lead_hours": -21.221,
       "variable": "wind_direction_10m",
       "value": 6.0,
       "unit": "°",
@@ -1038,8 +1038,8 @@
           "provider": "open_meteo",
           "value": 6,
           "unit": "°",
-          "lead_hours": -20.705,
-          "payload_hash": "d2fc3614d8b76269a48752df28740c7fc23728c3ed426e197dd4f39dbd2b4cb0"
+          "lead_hours": -21.221,
+          "payload_hash": "0b5504faf584ac3a36df5530b480cd6da9a095fc754ccb99c5ca7e356fd335dc"
         }
       ],
       "weights": {
@@ -1053,9 +1053,9 @@
     },
     {
       "location_id": "split",
-      "issued_at": "2026-06-02T18:42:18.776232+00:00",
+      "issued_at": "2026-06-02T19:13:16.571020+00:00",
       "valid_at": "2026-06-01T22:00:00+00:00",
-      "lead_hours": -20.705,
+      "lead_hours": -21.221,
       "variable": "wind_speed_10m",
       "value": 0.917,
       "unit": "m/s",
@@ -1065,8 +1065,8 @@
           "provider": "open_meteo",
           "value": 0.917,
           "unit": "m/s",
-          "lead_hours": -20.705,
-          "payload_hash": "d2fc3614d8b76269a48752df28740c7fc23728c3ed426e197dd4f39dbd2b4cb0"
+          "lead_hours": -21.221,
+          "payload_hash": "0b5504faf584ac3a36df5530b480cd6da9a095fc754ccb99c5ca7e356fd335dc"
         }
       ],
       "weights": {
@@ -1080,9 +1080,9 @@
     },
     {
       "location_id": "split",
-      "issued_at": "2026-06-02T18:42:18.776232+00:00",
+      "issued_at": "2026-06-02T19:13:16.571020+00:00",
       "valid_at": "2026-06-01T23:00:00+00:00",
-      "lead_hours": -19.705,
+      "lead_hours": -20.221,
       "variable": "temperature_2m",
       "value": 19.4,
       "unit": "°C",
@@ -1092,8 +1092,8 @@
           "provider": "open_meteo",
           "value": 19.4,
           "unit": "°C",
-          "lead_hours": -19.705,
-          "payload_hash": "d2fc3614d8b76269a48752df28740c7fc23728c3ed426e197dd4f39dbd2b4cb0"
+          "lead_hours": -20.221,
+          "payload_hash": "0b5504faf584ac3a36df5530b480cd6da9a095fc754ccb99c5ca7e356fd335dc"
         }
       ],
       "weights": {
@@ -1107,9 +1107,9 @@
     },
     {
       "location_id": "split",
-      "issued_at": "2026-06-02T18:42:18.776232+00:00",
+      "issued_at": "2026-06-02T19:13:16.571020+00:00",
       "valid_at": "2026-06-01T23:00:00+00:00",
-      "lead_hours": -19.705,
+      "lead_hours": -20.221,
       "variable": "wind_direction_10m",
       "value": 14.0,
       "unit": "°",
@@ -1119,8 +1119,8 @@
           "provider": "open_meteo",
           "value": 14,
           "unit": "°",
-          "lead_hours": -19.705,
-          "payload_hash": "d2fc3614d8b76269a48752df28740c7fc23728c3ed426e197dd4f39dbd2b4cb0"
+          "lead_hours": -20.221,
+          "payload_hash": "0b5504faf584ac3a36df5530b480cd6da9a095fc754ccb99c5ca7e356fd335dc"
         }
       ],
       "weights": {
@@ -1134,9 +1134,9 @@
     },
     {
       "location_id": "split",
-      "issued_at": "2026-06-02T18:42:18.776232+00:00",
+      "issued_at": "2026-06-02T19:13:16.571020+00:00",
       "valid_at": "2026-06-01T23:00:00+00:00",
-      "lead_hours": -19.705,
+      "lead_hours": -20.221,
       "variable": "wind_speed_10m",
       "value": 0.833,
       "unit": "m/s",
@@ -1146,8 +1146,8 @@
           "provider": "open_meteo",
           "value": 0.833,
           "unit": "m/s",
-          "lead_hours": -19.705,
-          "payload_hash": "d2fc3614d8b76269a48752df28740c7fc23728c3ed426e197dd4f39dbd2b4cb0"
+          "lead_hours": -20.221,
+          "payload_hash": "0b5504faf584ac3a36df5530b480cd6da9a095fc754ccb99c5ca7e356fd335dc"
         }
       ],
       "weights": {
@@ -1161,9 +1161,9 @@
     },
     {
       "location_id": "split",
-      "issued_at": "2026-06-02T18:42:18.776232+00:00",
+      "issued_at": "2026-06-02T19:13:16.571020+00:00",
       "valid_at": "2026-06-02T00:00:00+00:00",
-      "lead_hours": -18.705,
+      "lead_hours": -19.221,
       "variable": "temperature_2m",
       "value": 19.2,
       "unit": "°C",
@@ -1173,8 +1173,8 @@
           "provider": "open_meteo",
           "value": 19.2,
           "unit": "°C",
-          "lead_hours": -18.705,
-          "payload_hash": "d2fc3614d8b76269a48752df28740c7fc23728c3ed426e197dd4f39dbd2b4cb0"
+          "lead_hours": -19.221,
+          "payload_hash": "0b5504faf584ac3a36df5530b480cd6da9a095fc754ccb99c5ca7e356fd335dc"
         }
       ],
       "weights": {
@@ -1188,9 +1188,9 @@
     },
     {
       "location_id": "split",
-      "issued_at": "2026-06-02T18:42:18.776232+00:00",
+      "issued_at": "2026-06-02T19:13:16.571020+00:00",
       "valid_at": "2026-06-02T00:00:00+00:00",
-      "lead_hours": -18.705,
+      "lead_hours": -19.221,
       "variable": "wind_direction_10m",
       "value": 6.0,
       "unit": "°",
@@ -1200,8 +1200,8 @@
           "provider": "open_meteo",
           "value": 6,
           "unit": "°",
-          "lead_hours": -18.705,
-          "payload_hash": "d2fc3614d8b76269a48752df28740c7fc23728c3ed426e197dd4f39dbd2b4cb0"
+          "lead_hours": -19.221,
+          "payload_hash": "0b5504faf584ac3a36df5530b480cd6da9a095fc754ccb99c5ca7e356fd335dc"
         }
       ],
       "weights": {
@@ -1215,9 +1215,9 @@
     },
     {
       "location_id": "split",
-      "issued_at": "2026-06-02T18:42:18.776232+00:00",
+      "issued_at": "2026-06-02T19:13:16.571020+00:00",
       "valid_at": "2026-06-02T00:00:00+00:00",
-      "lead_hours": -18.705,
+      "lead_hours": -19.221,
       "variable": "wind_speed_10m",
       "value": 0.917,
       "unit": "m/s",
@@ -1227,8 +1227,8 @@
           "provider": "open_meteo",
           "value": 0.917,
           "unit": "m/s",
-          "lead_hours": -18.705,
-          "payload_hash": "d2fc3614d8b76269a48752df28740c7fc23728c3ed426e197dd4f39dbd2b4cb0"
+          "lead_hours": -19.221,
+          "payload_hash": "0b5504faf584ac3a36df5530b480cd6da9a095fc754ccb99c5ca7e356fd335dc"
         }
       ],
       "weights": {
@@ -1242,9 +1242,9 @@
     },
     {
       "location_id": "split",
-      "issued_at": "2026-06-02T18:42:18.776232+00:00",
+      "issued_at": "2026-06-02T19:13:16.571020+00:00",
       "valid_at": "2026-06-02T01:00:00+00:00",
-      "lead_hours": -17.705,
+      "lead_hours": -18.221,
       "variable": "temperature_2m",
       "value": 18.9,
       "unit": "°C",
@@ -1254,8 +1254,8 @@
           "provider": "open_meteo",
           "value": 18.9,
           "unit": "°C",
-          "lead_hours": -17.705,
-          "payload_hash": "d2fc3614d8b76269a48752df28740c7fc23728c3ed426e197dd4f39dbd2b4cb0"
+          "lead_hours": -18.221,
+          "payload_hash": "0b5504faf584ac3a36df5530b480cd6da9a095fc754ccb99c5ca7e356fd335dc"
         }
       ],
       "weights": {
@@ -1269,9 +1269,9 @@
     },
     {
       "location_id": "split",
-      "issued_at": "2026-06-02T18:42:18.776232+00:00",
+      "issued_at": "2026-06-02T19:13:16.571020+00:00",
       "valid_at": "2026-06-02T01:00:00+00:00",
-      "lead_hours": -17.705,
+      "lead_hours": -18.221,
       "variable": "wind_direction_10m",
       "value": 6.0,
       "unit": "°",
@@ -1281,8 +1281,8 @@
           "provider": "open_meteo",
           "value": 6,
           "unit": "°",
-          "lead_hours": -17.705,
-          "payload_hash": "d2fc3614d8b76269a48752df28740c7fc23728c3ed426e197dd4f39dbd2b4cb0"
+          "lead_hours": -18.221,
+          "payload_hash": "0b5504faf584ac3a36df5530b480cd6da9a095fc754ccb99c5ca7e356fd335dc"
         }
       ],
       "weights": {
@@ -1296,9 +1296,9 @@
     },
     {
       "location_id": "split",
-      "issued_at": "2026-06-02T18:42:18.776232+00:00",
+      "issued_at": "2026-06-02T19:13:16.571020+00:00",
       "valid_at": "2026-06-02T01:00:00+00:00",
-      "lead_hours": -17.705,
+      "lead_hours": -18.221,
       "variable": "wind_speed_10m",
       "value": 0.917,
       "unit": "m/s",
@@ -1308,8 +1308,8 @@
           "provider": "open_meteo",
           "value": 0.917,
           "unit": "m/s",
-          "lead_hours": -17.705,
-          "payload_hash": "d2fc3614d8b76269a48752df28740c7fc23728c3ed426e197dd4f39dbd2b4cb0"
+          "lead_hours": -18.221,
+          "payload_hash": "0b5504faf584ac3a36df5530b480cd6da9a095fc754ccb99c5ca7e356fd335dc"
         }
       ],
       "weights": {
@@ -1326,114 +1326,114 @@
     {
       "provider": "open_meteo",
       "location_id": "split",
-      "issued_at": "2026-06-02T18:42:18.776232+00:00",
-      "valid_at": "2026-06-02T20:30:00+02:00",
-      "lead_hours": -0.205,
+      "issued_at": "2026-06-02T19:13:16.571020+00:00",
+      "valid_at": "2026-06-02T21:00:00+02:00",
+      "lead_hours": -0.221,
       "variable": "temperature_2m",
-      "value": 22.5,
+      "value": 22.1,
       "unit": "°C",
       "source_url": "https://api.open-meteo.com/v1/forecast?latitude=43.5081&longitude=16.4402&current=temperature_2m%2Crelative_humidity_2m%2Cwind_speed_10m%2Cwind_direction_10m%2Cweather_code&hourly=temperature_2m%2Cprecipitation_probability%2Cwind_speed_10m%2Cwind_direction_10m&forecast_days=1&timezone=Europe%2FZagreb",
       "attribution": "Weather data by Open-Meteo.com",
       "licence_note": "CC BY 4.0 data; free API non-commercial limits apply.",
-      "payload_hash": "d2fc3614d8b76269a48752df28740c7fc23728c3ed426e197dd4f39dbd2b4cb0"
+      "payload_hash": "0b5504faf584ac3a36df5530b480cd6da9a095fc754ccb99c5ca7e356fd335dc"
     },
     {
       "provider": "open_meteo",
       "location_id": "split",
-      "issued_at": "2026-06-02T18:42:18.776232+00:00",
-      "valid_at": "2026-06-02T20:30:00+02:00",
-      "lead_hours": -0.205,
+      "issued_at": "2026-06-02T19:13:16.571020+00:00",
+      "valid_at": "2026-06-02T21:00:00+02:00",
+      "lead_hours": -0.221,
       "variable": "relative_humidity_2m",
-      "value": 65,
+      "value": 68,
       "unit": "%",
       "source_url": "https://api.open-meteo.com/v1/forecast?latitude=43.5081&longitude=16.4402&current=temperature_2m%2Crelative_humidity_2m%2Cwind_speed_10m%2Cwind_direction_10m%2Cweather_code&hourly=temperature_2m%2Cprecipitation_probability%2Cwind_speed_10m%2Cwind_direction_10m&forecast_days=1&timezone=Europe%2FZagreb",
       "attribution": "Weather data by Open-Meteo.com",
       "licence_note": "CC BY 4.0 data; free API non-commercial limits apply.",
-      "payload_hash": "d2fc3614d8b76269a48752df28740c7fc23728c3ed426e197dd4f39dbd2b4cb0"
+      "payload_hash": "0b5504faf584ac3a36df5530b480cd6da9a095fc754ccb99c5ca7e356fd335dc"
     },
     {
       "provider": "open_meteo",
       "location_id": "split",
-      "issued_at": "2026-06-02T18:42:18.776232+00:00",
-      "valid_at": "2026-06-02T20:30:00+02:00",
-      "lead_hours": -0.205,
+      "issued_at": "2026-06-02T19:13:16.571020+00:00",
+      "valid_at": "2026-06-02T21:00:00+02:00",
+      "lead_hours": -0.221,
       "variable": "wind_speed_10m",
-      "value": 0.5,
+      "value": 0.611,
       "unit": "m/s",
       "source_url": "https://api.open-meteo.com/v1/forecast?latitude=43.5081&longitude=16.4402&current=temperature_2m%2Crelative_humidity_2m%2Cwind_speed_10m%2Cwind_direction_10m%2Cweather_code&hourly=temperature_2m%2Cprecipitation_probability%2Cwind_speed_10m%2Cwind_direction_10m&forecast_days=1&timezone=Europe%2FZagreb",
       "attribution": "Weather data by Open-Meteo.com",
       "licence_note": "CC BY 4.0 data; free API non-commercial limits apply.",
-      "payload_hash": "d2fc3614d8b76269a48752df28740c7fc23728c3ed426e197dd4f39dbd2b4cb0"
+      "payload_hash": "0b5504faf584ac3a36df5530b480cd6da9a095fc754ccb99c5ca7e356fd335dc"
     },
     {
       "provider": "open_meteo",
       "location_id": "split",
-      "issued_at": "2026-06-02T18:42:18.776232+00:00",
-      "valid_at": "2026-06-02T20:30:00+02:00",
-      "lead_hours": -0.205,
+      "issued_at": "2026-06-02T19:13:16.571020+00:00",
+      "valid_at": "2026-06-02T21:00:00+02:00",
+      "lead_hours": -0.221,
       "variable": "wind_direction_10m",
-      "value": 11,
+      "value": 360,
       "unit": "°",
       "source_url": "https://api.open-meteo.com/v1/forecast?latitude=43.5081&longitude=16.4402&current=temperature_2m%2Crelative_humidity_2m%2Cwind_speed_10m%2Cwind_direction_10m%2Cweather_code&hourly=temperature_2m%2Cprecipitation_probability%2Cwind_speed_10m%2Cwind_direction_10m&forecast_days=1&timezone=Europe%2FZagreb",
       "attribution": "Weather data by Open-Meteo.com",
       "licence_note": "CC BY 4.0 data; free API non-commercial limits apply.",
-      "payload_hash": "d2fc3614d8b76269a48752df28740c7fc23728c3ed426e197dd4f39dbd2b4cb0"
+      "payload_hash": "0b5504faf584ac3a36df5530b480cd6da9a095fc754ccb99c5ca7e356fd335dc"
     },
     {
       "provider": "open_meteo",
       "location_id": "split",
-      "issued_at": "2026-06-02T18:42:18.776232+00:00",
-      "valid_at": "2026-06-02T20:30:00+02:00",
-      "lead_hours": -0.205,
+      "issued_at": "2026-06-02T19:13:16.571020+00:00",
+      "valid_at": "2026-06-02T21:00:00+02:00",
+      "lead_hours": -0.221,
       "variable": "weather_code",
       "value": 3,
       "unit": "wmo code",
       "source_url": "https://api.open-meteo.com/v1/forecast?latitude=43.5081&longitude=16.4402&current=temperature_2m%2Crelative_humidity_2m%2Cwind_speed_10m%2Cwind_direction_10m%2Cweather_code&hourly=temperature_2m%2Cprecipitation_probability%2Cwind_speed_10m%2Cwind_direction_10m&forecast_days=1&timezone=Europe%2FZagreb",
       "attribution": "Weather data by Open-Meteo.com",
       "licence_note": "CC BY 4.0 data; free API non-commercial limits apply.",
-      "payload_hash": "d2fc3614d8b76269a48752df28740c7fc23728c3ed426e197dd4f39dbd2b4cb0"
+      "payload_hash": "0b5504faf584ac3a36df5530b480cd6da9a095fc754ccb99c5ca7e356fd335dc"
     },
     {
       "provider": "open_meteo",
       "location_id": "split",
-      "issued_at": "2026-06-02T18:42:18.776232+00:00",
+      "issued_at": "2026-06-02T19:13:16.571020+00:00",
       "valid_at": "2026-06-02T00:00:00+02:00",
-      "lead_hours": -20.705,
+      "lead_hours": -21.221,
       "variable": "temperature_2m",
       "value": 19.9,
       "unit": "°C",
       "source_url": "https://api.open-meteo.com/v1/forecast?latitude=43.5081&longitude=16.4402&current=temperature_2m%2Crelative_humidity_2m%2Cwind_speed_10m%2Cwind_direction_10m%2Cweather_code&hourly=temperature_2m%2Cprecipitation_probability%2Cwind_speed_10m%2Cwind_direction_10m&forecast_days=1&timezone=Europe%2FZagreb",
       "attribution": "Weather data by Open-Meteo.com",
       "licence_note": "CC BY 4.0 data; free API non-commercial limits apply.",
-      "payload_hash": "d2fc3614d8b76269a48752df28740c7fc23728c3ed426e197dd4f39dbd2b4cb0"
+      "payload_hash": "0b5504faf584ac3a36df5530b480cd6da9a095fc754ccb99c5ca7e356fd335dc"
     },
     {
       "provider": "open_meteo",
       "location_id": "split",
-      "issued_at": "2026-06-02T18:42:18.776232+00:00",
+      "issued_at": "2026-06-02T19:13:16.571020+00:00",
       "valid_at": "2026-06-02T00:00:00+02:00",
-      "lead_hours": -20.705,
+      "lead_hours": -21.221,
       "variable": "precipitation_probability",
       "value": 0,
       "unit": "%",
       "source_url": "https://api.open-meteo.com/v1/forecast?latitude=43.5081&longitude=16.4402&current=temperature_2m%2Crelative_humidity_2m%2Cwind_speed_10m%2Cwind_direction_10m%2Cweather_code&hourly=temperature_2m%2Cprecipitation_probability%2Cwind_speed_10m%2Cwind_direction_10m&forecast_days=1&timezone=Europe%2FZagreb",
       "attribution": "Weather data by Open-Meteo.com",
       "licence_note": "CC BY 4.0 data; free API non-commercial limits apply.",
-      "payload_hash": "d2fc3614d8b76269a48752df28740c7fc23728c3ed426e197dd4f39dbd2b4cb0"
+      "payload_hash": "0b5504faf584ac3a36df5530b480cd6da9a095fc754ccb99c5ca7e356fd335dc"
     },
     {
       "provider": "open_meteo",
       "location_id": "split",
-      "issued_at": "2026-06-02T18:42:18.776232+00:00",
+      "issued_at": "2026-06-02T19:13:16.571020+00:00",
       "valid_at": "2026-06-02T00:00:00+02:00",
-      "lead_hours": -20.705,
+      "lead_hours": -21.221,
       "variable": "wind_speed_10m",
       "value": 0.917,
       "unit": "m/s",
       "source_url": "https://api.open-meteo.com/v1/forecast?latitude=43.5081&longitude=16.4402&current=temperature_2m%2Crelative_humidity_2m%2Cwind_speed_10m%2Cwind_direction_10m%2Cweather_code&hourly=temperature_2m%2Cprecipitation_probability%2Cwind_speed_10m%2Cwind_direction_10m&forecast_days=1&timezone=Europe%2FZagreb",
       "attribution": "Weather data by Open-Meteo.com",
       "licence_note": "CC BY 4.0 data; free API non-commercial limits apply.",
-      "payload_hash": "d2fc3614d8b76269a48752df28740c7fc23728c3ed426e197dd4f39dbd2b4cb0"
+      "payload_hash": "0b5504faf584ac3a36df5530b480cd6da9a095fc754ccb99c5ca7e356fd335dc"
     }
   ],
   "sample_met_no_forecasts": [
@@ -1441,262 +1441,262 @@
       "provider": "met_no",
       "location_id": "split",
       "issued_at": "2026-06-02T17:14:01+00:00",
-      "valid_at": "2026-06-02T18:00:00+00:00",
-      "lead_hours": 0.766,
+      "valid_at": "2026-06-02T19:00:00+00:00",
+      "lead_hours": 1.766,
       "variable": "pressure_msl",
-      "value": 1012.1,
+      "value": 1011.9,
       "unit": "hPa",
       "source_url": "https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=43.5081&lon=16.4402",
       "attribution": "Weather data by MET Norway",
       "licence_note": "CC BY 4.0 data; attribution and identifying User-Agent required.",
-      "payload_hash": "7ab9a9d489c4a3052f5c93ca584ce7d69cf20a29e97ef415609f139266ff8187"
+      "payload_hash": "7f8e2b4195b67b2ffd34e37fbcfb7633b4cde9589c6ed2958b61dc39fbfd0b59"
     },
     {
       "provider": "met_no",
       "location_id": "split",
       "issued_at": "2026-06-02T17:14:01+00:00",
-      "valid_at": "2026-06-02T18:00:00+00:00",
-      "lead_hours": 0.766,
+      "valid_at": "2026-06-02T19:00:00+00:00",
+      "lead_hours": 1.766,
       "variable": "temperature_2m",
-      "value": 21.8,
+      "value": 20.8,
       "unit": "degC",
       "source_url": "https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=43.5081&lon=16.4402",
       "attribution": "Weather data by MET Norway",
       "licence_note": "CC BY 4.0 data; attribution and identifying User-Agent required.",
-      "payload_hash": "7ab9a9d489c4a3052f5c93ca584ce7d69cf20a29e97ef415609f139266ff8187"
+      "payload_hash": "7f8e2b4195b67b2ffd34e37fbcfb7633b4cde9589c6ed2958b61dc39fbfd0b59"
     },
     {
       "provider": "met_no",
       "location_id": "split",
       "issued_at": "2026-06-02T17:14:01+00:00",
-      "valid_at": "2026-06-02T18:00:00+00:00",
-      "lead_hours": 0.766,
+      "valid_at": "2026-06-02T19:00:00+00:00",
+      "lead_hours": 1.766,
       "variable": "cloud_area_fraction",
-      "value": 91.4,
+      "value": 89.1,
       "unit": "%",
       "source_url": "https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=43.5081&lon=16.4402",
       "attribution": "Weather data by MET Norway",
       "licence_note": "CC BY 4.0 data; attribution and identifying User-Agent required.",
-      "payload_hash": "7ab9a9d489c4a3052f5c93ca584ce7d69cf20a29e97ef415609f139266ff8187"
+      "payload_hash": "7f8e2b4195b67b2ffd34e37fbcfb7633b4cde9589c6ed2958b61dc39fbfd0b59"
     },
     {
       "provider": "met_no",
       "location_id": "split",
       "issued_at": "2026-06-02T17:14:01+00:00",
-      "valid_at": "2026-06-02T18:00:00+00:00",
-      "lead_hours": 0.766,
+      "valid_at": "2026-06-02T19:00:00+00:00",
+      "lead_hours": 1.766,
       "variable": "relative_humidity_2m",
-      "value": 60.7,
+      "value": 60.5,
       "unit": "%",
       "source_url": "https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=43.5081&lon=16.4402",
       "attribution": "Weather data by MET Norway",
       "licence_note": "CC BY 4.0 data; attribution and identifying User-Agent required.",
-      "payload_hash": "7ab9a9d489c4a3052f5c93ca584ce7d69cf20a29e97ef415609f139266ff8187"
+      "payload_hash": "7f8e2b4195b67b2ffd34e37fbcfb7633b4cde9589c6ed2958b61dc39fbfd0b59"
     },
     {
       "provider": "met_no",
       "location_id": "split",
       "issued_at": "2026-06-02T17:14:01+00:00",
-      "valid_at": "2026-06-02T18:00:00+00:00",
-      "lead_hours": 0.766,
+      "valid_at": "2026-06-02T19:00:00+00:00",
+      "lead_hours": 1.766,
       "variable": "wind_direction_10m",
-      "value": 26.2,
+      "value": 28.4,
       "unit": "degree",
       "source_url": "https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=43.5081&lon=16.4402",
       "attribution": "Weather data by MET Norway",
       "licence_note": "CC BY 4.0 data; attribution and identifying User-Agent required.",
-      "payload_hash": "7ab9a9d489c4a3052f5c93ca584ce7d69cf20a29e97ef415609f139266ff8187"
+      "payload_hash": "7f8e2b4195b67b2ffd34e37fbcfb7633b4cde9589c6ed2958b61dc39fbfd0b59"
     },
     {
       "provider": "met_no",
       "location_id": "split",
       "issued_at": "2026-06-02T17:14:01+00:00",
-      "valid_at": "2026-06-02T18:00:00+00:00",
-      "lead_hours": 0.766,
+      "valid_at": "2026-06-02T19:00:00+00:00",
+      "lead_hours": 1.766,
       "variable": "wind_speed_10m",
-      "value": 1.7,
+      "value": 2.2,
       "unit": "m/s",
       "source_url": "https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=43.5081&lon=16.4402",
       "attribution": "Weather data by MET Norway",
       "licence_note": "CC BY 4.0 data; attribution and identifying User-Agent required.",
-      "payload_hash": "7ab9a9d489c4a3052f5c93ca584ce7d69cf20a29e97ef415609f139266ff8187"
+      "payload_hash": "7f8e2b4195b67b2ffd34e37fbcfb7633b4cde9589c6ed2958b61dc39fbfd0b59"
     },
     {
       "provider": "met_no",
       "location_id": "split",
       "issued_at": "2026-06-02T17:14:01+00:00",
-      "valid_at": "2026-06-02T18:00:00+00:00",
-      "lead_hours": 0.766,
+      "valid_at": "2026-06-02T19:00:00+00:00",
+      "lead_hours": 1.766,
       "variable": "precipitation_amount_1h",
       "value": 0.0,
       "unit": "mm",
       "source_url": "https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=43.5081&lon=16.4402",
       "attribution": "Weather data by MET Norway",
       "licence_note": "CC BY 4.0 data; attribution and identifying User-Agent required.",
-      "payload_hash": "7ab9a9d489c4a3052f5c93ca584ce7d69cf20a29e97ef415609f139266ff8187"
+      "payload_hash": "7f8e2b4195b67b2ffd34e37fbcfb7633b4cde9589c6ed2958b61dc39fbfd0b59"
     },
     {
       "provider": "met_no",
       "location_id": "split",
       "issued_at": "2026-06-02T17:14:01+00:00",
-      "valid_at": "2026-06-02T18:00:00+00:00",
-      "lead_hours": 0.766,
+      "valid_at": "2026-06-02T19:00:00+00:00",
+      "lead_hours": 1.766,
       "variable": "weather_symbol_1h",
       "value": "partlycloudy_night",
       "unit": "code",
       "source_url": "https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=43.5081&lon=16.4402",
       "attribution": "Weather data by MET Norway",
       "licence_note": "CC BY 4.0 data; attribution and identifying User-Agent required.",
-      "payload_hash": "7ab9a9d489c4a3052f5c93ca584ce7d69cf20a29e97ef415609f139266ff8187"
+      "payload_hash": "7f8e2b4195b67b2ffd34e37fbcfb7633b4cde9589c6ed2958b61dc39fbfd0b59"
     }
   ],
   "sample_marine_forecasts": [
     {
       "provider": "open_meteo_marine",
       "location_id": "split",
-      "issued_at": "2026-06-02T18:42:18.776232+00:00",
-      "valid_at": "2026-06-02T20:30:00+02:00",
-      "lead_hours": -0.205,
+      "issued_at": "2026-06-02T19:13:16.571020+00:00",
+      "valid_at": "2026-06-02T21:00:00+02:00",
+      "lead_hours": -0.221,
       "variable": "wave_height",
       "value": 0.04,
       "unit": "m",
       "source_url": "https://marine-api.open-meteo.com/v1/marine?latitude=43.5081&longitude=16.4402&current=wave_height%2Cwave_direction%2Cwave_period%2Cwind_wave_height%2Cswell_wave_height%2Csea_surface_temperature%2Cocean_current_velocity%2Cocean_current_direction&hourly=wave_height%2Cwave_direction%2Cwave_period%2Cwind_wave_height%2Cswell_wave_height%2Csea_surface_temperature%2Cocean_current_velocity%2Cocean_current_direction%2Csea_level_height_msl&forecast_days=2&timezone=Europe%2FZagreb&cell_selection=sea",
       "attribution": "Marine weather data by Open-Meteo.com",
       "licence_note": "CC BY 4.0 data; marine model attribution required; not suitable for coastal navigation.",
-      "payload_hash": "5b446afcca7fee52816a1d9398b743dc28d9c70e097c1af6a440b04889ae3ae7"
+      "payload_hash": "93a5184811316c482ac785b2b50ec266aabac0264448fbfd824a2222e967b3e2"
     },
     {
       "provider": "open_meteo_marine",
       "location_id": "split",
-      "issued_at": "2026-06-02T18:42:18.776232+00:00",
-      "valid_at": "2026-06-02T20:30:00+02:00",
-      "lead_hours": -0.205,
+      "issued_at": "2026-06-02T19:13:16.571020+00:00",
+      "valid_at": "2026-06-02T21:00:00+02:00",
+      "lead_hours": -0.221,
       "variable": "wave_direction",
-      "value": 166,
+      "value": 164,
       "unit": "°",
       "source_url": "https://marine-api.open-meteo.com/v1/marine?latitude=43.5081&longitude=16.4402&current=wave_height%2Cwave_direction%2Cwave_period%2Cwind_wave_height%2Cswell_wave_height%2Csea_surface_temperature%2Cocean_current_velocity%2Cocean_current_direction&hourly=wave_height%2Cwave_direction%2Cwave_period%2Cwind_wave_height%2Cswell_wave_height%2Csea_surface_temperature%2Cocean_current_velocity%2Cocean_current_direction%2Csea_level_height_msl&forecast_days=2&timezone=Europe%2FZagreb&cell_selection=sea",
       "attribution": "Marine weather data by Open-Meteo.com",
       "licence_note": "CC BY 4.0 data; marine model attribution required; not suitable for coastal navigation.",
-      "payload_hash": "5b446afcca7fee52816a1d9398b743dc28d9c70e097c1af6a440b04889ae3ae7"
+      "payload_hash": "93a5184811316c482ac785b2b50ec266aabac0264448fbfd824a2222e967b3e2"
     },
     {
       "provider": "open_meteo_marine",
       "location_id": "split",
-      "issued_at": "2026-06-02T18:42:18.776232+00:00",
-      "valid_at": "2026-06-02T20:30:00+02:00",
-      "lead_hours": -0.205,
+      "issued_at": "2026-06-02T19:13:16.571020+00:00",
+      "valid_at": "2026-06-02T21:00:00+02:00",
+      "lead_hours": -0.221,
       "variable": "wave_period",
-      "value": 3.2,
+      "value": 3.25,
       "unit": "s",
       "source_url": "https://marine-api.open-meteo.com/v1/marine?latitude=43.5081&longitude=16.4402&current=wave_height%2Cwave_direction%2Cwave_period%2Cwind_wave_height%2Cswell_wave_height%2Csea_surface_temperature%2Cocean_current_velocity%2Cocean_current_direction&hourly=wave_height%2Cwave_direction%2Cwave_period%2Cwind_wave_height%2Cswell_wave_height%2Csea_surface_temperature%2Cocean_current_velocity%2Cocean_current_direction%2Csea_level_height_msl&forecast_days=2&timezone=Europe%2FZagreb&cell_selection=sea",
       "attribution": "Marine weather data by Open-Meteo.com",
       "licence_note": "CC BY 4.0 data; marine model attribution required; not suitable for coastal navigation.",
-      "payload_hash": "5b446afcca7fee52816a1d9398b743dc28d9c70e097c1af6a440b04889ae3ae7"
+      "payload_hash": "93a5184811316c482ac785b2b50ec266aabac0264448fbfd824a2222e967b3e2"
     },
     {
       "provider": "open_meteo_marine",
       "location_id": "split",
-      "issued_at": "2026-06-02T18:42:18.776232+00:00",
-      "valid_at": "2026-06-02T20:30:00+02:00",
-      "lead_hours": -0.205,
+      "issued_at": "2026-06-02T19:13:16.571020+00:00",
+      "valid_at": "2026-06-02T21:00:00+02:00",
+      "lead_hours": -0.221,
       "variable": "wind_wave_height",
       "value": 0.0,
       "unit": "m",
       "source_url": "https://marine-api.open-meteo.com/v1/marine?latitude=43.5081&longitude=16.4402&current=wave_height%2Cwave_direction%2Cwave_period%2Cwind_wave_height%2Cswell_wave_height%2Csea_surface_temperature%2Cocean_current_velocity%2Cocean_current_direction&hourly=wave_height%2Cwave_direction%2Cwave_period%2Cwind_wave_height%2Cswell_wave_height%2Csea_surface_temperature%2Cocean_current_velocity%2Cocean_current_direction%2Csea_level_height_msl&forecast_days=2&timezone=Europe%2FZagreb&cell_selection=sea",
       "attribution": "Marine weather data by Open-Meteo.com",
       "licence_note": "CC BY 4.0 data; marine model attribution required; not suitable for coastal navigation.",
-      "payload_hash": "5b446afcca7fee52816a1d9398b743dc28d9c70e097c1af6a440b04889ae3ae7"
+      "payload_hash": "93a5184811316c482ac785b2b50ec266aabac0264448fbfd824a2222e967b3e2"
     },
     {
       "provider": "open_meteo_marine",
       "location_id": "split",
-      "issued_at": "2026-06-02T18:42:18.776232+00:00",
-      "valid_at": "2026-06-02T20:30:00+02:00",
-      "lead_hours": -0.205,
+      "issued_at": "2026-06-02T19:13:16.571020+00:00",
+      "valid_at": "2026-06-02T21:00:00+02:00",
+      "lead_hours": -0.221,
       "variable": "swell_wave_height",
       "value": 0.02,
       "unit": "m",
       "source_url": "https://marine-api.open-meteo.com/v1/marine?latitude=43.5081&longitude=16.4402&current=wave_height%2Cwave_direction%2Cwave_period%2Cwind_wave_height%2Cswell_wave_height%2Csea_surface_temperature%2Cocean_current_velocity%2Cocean_current_direction&hourly=wave_height%2Cwave_direction%2Cwave_period%2Cwind_wave_height%2Cswell_wave_height%2Csea_surface_temperature%2Cocean_current_velocity%2Cocean_current_direction%2Csea_level_height_msl&forecast_days=2&timezone=Europe%2FZagreb&cell_selection=sea",
       "attribution": "Marine weather data by Open-Meteo.com",
       "licence_note": "CC BY 4.0 data; marine model attribution required; not suitable for coastal navigation.",
-      "payload_hash": "5b446afcca7fee52816a1d9398b743dc28d9c70e097c1af6a440b04889ae3ae7"
+      "payload_hash": "93a5184811316c482ac785b2b50ec266aabac0264448fbfd824a2222e967b3e2"
     },
     {
       "provider": "open_meteo_marine",
       "location_id": "split",
-      "issued_at": "2026-06-02T18:42:18.776232+00:00",
-      "valid_at": "2026-06-02T20:30:00+02:00",
-      "lead_hours": -0.205,
+      "issued_at": "2026-06-02T19:13:16.571020+00:00",
+      "valid_at": "2026-06-02T21:00:00+02:00",
+      "lead_hours": -0.221,
       "variable": "sea_surface_temperature",
       "value": 22.0,
       "unit": "°C",
       "source_url": "https://marine-api.open-meteo.com/v1/marine?latitude=43.5081&longitude=16.4402&current=wave_height%2Cwave_direction%2Cwave_period%2Cwind_wave_height%2Cswell_wave_height%2Csea_surface_temperature%2Cocean_current_velocity%2Cocean_current_direction&hourly=wave_height%2Cwave_direction%2Cwave_period%2Cwind_wave_height%2Cswell_wave_height%2Csea_surface_temperature%2Cocean_current_velocity%2Cocean_current_direction%2Csea_level_height_msl&forecast_days=2&timezone=Europe%2FZagreb&cell_selection=sea",
       "attribution": "Marine weather data by Open-Meteo.com",
       "licence_note": "CC BY 4.0 data; marine model attribution required; not suitable for coastal navigation.",
-      "payload_hash": "5b446afcca7fee52816a1d9398b743dc28d9c70e097c1af6a440b04889ae3ae7"
+      "payload_hash": "93a5184811316c482ac785b2b50ec266aabac0264448fbfd824a2222e967b3e2"
     },
     {
       "provider": "open_meteo_marine",
       "location_id": "split",
-      "issued_at": "2026-06-02T18:42:18.776232+00:00",
-      "valid_at": "2026-06-02T20:30:00+02:00",
-      "lead_hours": -0.205,
+      "issued_at": "2026-06-02T19:13:16.571020+00:00",
+      "valid_at": "2026-06-02T21:00:00+02:00",
+      "lead_hours": -0.221,
       "variable": "ocean_current_velocity",
       "value": 0.4,
       "unit": "km/h",
       "source_url": "https://marine-api.open-meteo.com/v1/marine?latitude=43.5081&longitude=16.4402&current=wave_height%2Cwave_direction%2Cwave_period%2Cwind_wave_height%2Cswell_wave_height%2Csea_surface_temperature%2Cocean_current_velocity%2Cocean_current_direction&hourly=wave_height%2Cwave_direction%2Cwave_period%2Cwind_wave_height%2Cswell_wave_height%2Csea_surface_temperature%2Cocean_current_velocity%2Cocean_current_direction%2Csea_level_height_msl&forecast_days=2&timezone=Europe%2FZagreb&cell_selection=sea",
       "attribution": "Marine weather data by Open-Meteo.com",
       "licence_note": "CC BY 4.0 data; marine model attribution required; not suitable for coastal navigation.",
-      "payload_hash": "5b446afcca7fee52816a1d9398b743dc28d9c70e097c1af6a440b04889ae3ae7"
+      "payload_hash": "93a5184811316c482ac785b2b50ec266aabac0264448fbfd824a2222e967b3e2"
     },
     {
       "provider": "open_meteo_marine",
       "location_id": "split",
-      "issued_at": "2026-06-02T18:42:18.776232+00:00",
-      "valid_at": "2026-06-02T20:30:00+02:00",
-      "lead_hours": -0.205,
+      "issued_at": "2026-06-02T19:13:16.571020+00:00",
+      "valid_at": "2026-06-02T21:00:00+02:00",
+      "lead_hours": -0.221,
       "variable": "ocean_current_direction",
       "value": 207,
       "unit": "°",
       "source_url": "https://marine-api.open-meteo.com/v1/marine?latitude=43.5081&longitude=16.4402&current=wave_height%2Cwave_direction%2Cwave_period%2Cwind_wave_height%2Cswell_wave_height%2Csea_surface_temperature%2Cocean_current_velocity%2Cocean_current_direction&hourly=wave_height%2Cwave_direction%2Cwave_period%2Cwind_wave_height%2Cswell_wave_height%2Csea_surface_temperature%2Cocean_current_velocity%2Cocean_current_direction%2Csea_level_height_msl&forecast_days=2&timezone=Europe%2FZagreb&cell_selection=sea",
       "attribution": "Marine weather data by Open-Meteo.com",
       "licence_note": "CC BY 4.0 data; marine model attribution required; not suitable for coastal navigation.",
-      "payload_hash": "5b446afcca7fee52816a1d9398b743dc28d9c70e097c1af6a440b04889ae3ae7"
+      "payload_hash": "93a5184811316c482ac785b2b50ec266aabac0264448fbfd824a2222e967b3e2"
     },
     {
       "provider": "open_meteo_marine",
       "location_id": "split",
-      "issued_at": "2026-06-02T18:42:18.776232+00:00",
+      "issued_at": "2026-06-02T19:13:16.571020+00:00",
       "valid_at": "2026-06-02T00:00:00+02:00",
-      "lead_hours": -20.705,
+      "lead_hours": -21.221,
       "variable": "wave_height",
       "value": 0.08,
       "unit": "m",
       "source_url": "https://marine-api.open-meteo.com/v1/marine?latitude=43.5081&longitude=16.4402&current=wave_height%2Cwave_direction%2Cwave_period%2Cwind_wave_height%2Cswell_wave_height%2Csea_surface_temperature%2Cocean_current_velocity%2Cocean_current_direction&hourly=wave_height%2Cwave_direction%2Cwave_period%2Cwind_wave_height%2Cswell_wave_height%2Csea_surface_temperature%2Cocean_current_velocity%2Cocean_current_direction%2Csea_level_height_msl&forecast_days=2&timezone=Europe%2FZagreb&cell_selection=sea",
       "attribution": "Marine weather data by Open-Meteo.com",
       "licence_note": "CC BY 4.0 data; marine model attribution required; not suitable for coastal navigation.",
-      "payload_hash": "5b446afcca7fee52816a1d9398b743dc28d9c70e097c1af6a440b04889ae3ae7"
+      "payload_hash": "93a5184811316c482ac785b2b50ec266aabac0264448fbfd824a2222e967b3e2"
     },
     {
       "provider": "open_meteo_marine",
       "location_id": "split",
-      "issued_at": "2026-06-02T18:42:18.776232+00:00",
+      "issued_at": "2026-06-02T19:13:16.571020+00:00",
       "valid_at": "2026-06-02T00:00:00+02:00",
-      "lead_hours": -20.705,
+      "lead_hours": -21.221,
       "variable": "wave_direction",
       "value": 192,
       "unit": "°",
       "source_url": "https://marine-api.open-meteo.com/v1/marine?latitude=43.5081&longitude=16.4402&current=wave_height%2Cwave_direction%2Cwave_period%2Cwind_wave_height%2Cswell_wave_height%2Csea_surface_temperature%2Cocean_current_velocity%2Cocean_current_direction&hourly=wave_height%2Cwave_direction%2Cwave_period%2Cwind_wave_height%2Cswell_wave_height%2Csea_surface_temperature%2Cocean_current_velocity%2Cocean_current_direction%2Csea_level_height_msl&forecast_days=2&timezone=Europe%2FZagreb&cell_selection=sea",
       "attribution": "Marine weather data by Open-Meteo.com",
       "licence_note": "CC BY 4.0 data; marine model attribution required; not suitable for coastal navigation.",
-      "payload_hash": "5b446afcca7fee52816a1d9398b743dc28d9c70e097c1af6a440b04889ae3ae7"
+      "payload_hash": "93a5184811316c482ac785b2b50ec266aabac0264448fbfd824a2222e967b3e2"
     }
   ],
   "sample_observations": [
     {
       "source": "dhmz",
       "station_name": "Split-Marjan",
-      "observed_at": "2026-06-02T20:00:00+02:00",
+      "observed_at": "2026-06-02T21:00:00+02:00",
       "latitude": 43.508,
       "longitude": 16.426,
       "variable": "temperature_2m",
@@ -1709,11 +1709,11 @@
     {
       "source": "dhmz",
       "station_name": "Split-aerodrom",
-      "observed_at": "2026-06-02T20:00:00+02:00",
+      "observed_at": "2026-06-02T21:00:00+02:00",
       "latitude": 43.539,
       "longitude": 16.301,
       "variable": "temperature_2m",
-      "value": 22.7,
+      "value": 20.7,
       "unit": "degC",
       "source_url": "https://vrijeme.hr/hrvatska_n.xml",
       "attribution": "Izvor: DHMZ",

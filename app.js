@@ -22,6 +22,8 @@ const FORECAST_ARCHIVE_KEY = "adria_fusion_forecast_archive_v1";
 const MAX_LOCAL_ARCHIVE_SNAPSHOTS = 180;
 const GPS_RELOAD_INTERVAL_MS = 15 * 60 * 1000;
 const GPS_RELOAD_DISTANCE_M = 500;
+const PLAYBACK_INTERVAL_MS = 1250;
+const RAIN_ALERT_PROBABILITY = 40;
 
 const I18N = {
   en: {
@@ -29,8 +31,27 @@ const I18N = {
     "status.sources": "sources",
     "status.freshness": "freshness",
     "status.truth": "truth",
+    "control.map": "Map",
+    "control.layers": "Layers",
+    "control.data": "Data",
+    "event.rain": "Rain",
+    "event.wind": "Wind",
+    "event.wave": "Wave",
+    "event.warning": "Watch",
+    "event.update": "Update",
+    "event.loading": "loading",
+    "event.none48": "none 48h",
+    "event.now": "now",
+    "event.at": "{time} {value}",
+    "event.peak": "{time} {value}",
+    "event.stable": "stable",
+    "event.lowConfidence": "verify",
+    "play.play": "Play",
+    "play.pause": "Pause",
     "mode.chart": "Real map",
     "mode.forecast": "Forecast",
+    "mode.focus": "Map focus",
+    "mode.focusExit": "Exit focus",
     "base.nautical": "Marine",
     "base.street": "Map",
     "base.satellite": "Real",
@@ -111,8 +132,27 @@ const I18N = {
     "status.sources": "Quellen",
     "status.freshness": "Frische",
     "status.truth": "Truth",
+    "control.map": "Karte",
+    "control.layers": "Layer",
+    "control.data": "Daten",
+    "event.rain": "Regen",
+    "event.wind": "Wind",
+    "event.wave": "Welle",
+    "event.warning": "Watch",
+    "event.update": "Update",
+    "event.loading": "laedt",
+    "event.none48": "kein 48h",
+    "event.now": "jetzt",
+    "event.at": "{time} {value}",
+    "event.peak": "{time} {value}",
+    "event.stable": "stabil",
+    "event.lowConfidence": "pruefen",
+    "play.play": "Play",
+    "play.pause": "Pause",
     "mode.chart": "Echte Karte",
     "mode.forecast": "Forecast",
+    "mode.focus": "Kartenfokus",
+    "mode.focusExit": "Fokus aus",
     "base.nautical": "Marine",
     "base.street": "Karte",
     "base.satellite": "Real",
@@ -193,8 +233,27 @@ const I18N = {
     "status.sources": "izvori",
     "status.freshness": "svjezina",
     "status.truth": "truth",
+    "control.map": "Karta",
+    "control.layers": "Slojevi",
+    "control.data": "Podaci",
+    "event.rain": "Kisa",
+    "event.wind": "Vjetar",
+    "event.wave": "Val",
+    "event.warning": "Watch",
+    "event.update": "Update",
+    "event.loading": "ucitava",
+    "event.none48": "nema 48h",
+    "event.now": "sada",
+    "event.at": "{time} {value}",
+    "event.peak": "{time} {value}",
+    "event.stable": "stabilno",
+    "event.lowConfidence": "provjeri",
+    "play.play": "Play",
+    "play.pause": "Pause",
     "mode.chart": "Stvarna karta",
     "mode.forecast": "Prognoza",
+    "mode.focus": "Fokus karte",
+    "mode.focusExit": "Izlaz fokus",
     "base.nautical": "More",
     "base.street": "Karta",
     "base.satellite": "Real",
@@ -345,7 +404,11 @@ const state = {
   forecastArchiveCount: 0,
   gpsWatchId: null,
   lastGpsForecastAt: 0,
-  lastGpsForecastLocation: null
+  lastGpsForecastLocation: null,
+  quickEvents: null,
+  isPlaying: false,
+  playTimer: null,
+  mapFocus: false
 };
 
 const el = {
@@ -367,6 +430,14 @@ const el = {
   currentMetric: document.getElementById("currentMetric"),
   seaMetric: document.getElementById("seaMetric"),
   chartDataState: document.getElementById("chartDataState"),
+  playButton: document.getElementById("playButton"),
+  mapFocusButton: document.getElementById("mapFocusButton"),
+  nextRain: document.getElementById("nextRain"),
+  eventSummary: document.getElementById("eventSummary"),
+  updateState: document.getElementById("updateState"),
+  rainTiming: document.getElementById("rainTiming"),
+  windTiming: document.getElementById("windTiming"),
+  waveTiming: document.getElementById("waveTiming"),
   timelineButtons: document.getElementById("timelineButtons"),
   timelineSlider: document.getElementById("timelineSlider"),
   sourceHealth: document.getElementById("sourceHealth"),
@@ -442,6 +513,9 @@ function applyI18n() {
     button.dataset.active = String(button.dataset.language === state.language);
   });
   updateGpsState(state.gpsLabelKey || "gps.idle");
+  updatePlayButton();
+  updateMapFocusState();
+  renderQuickSituation(state.frames[state.selectedFrame]);
   updateChartStatus(state.frames[state.selectedFrame]);
 }
 
@@ -452,19 +526,19 @@ function timelineLabel(item) {
 function buildTimelineControls() {
   el.timelineButtons.replaceChildren();
   TIMELINE.forEach((frame, index) => {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.textContent = timelineLabel(frame);
-    button.dataset.index = String(index);
-    button.setAttribute("aria-pressed", String(index === state.selectedFrame));
-    button.addEventListener("click", () => selectFrame(index));
-    el.timelineButtons.append(button);
+    const tick = document.createElement("span");
+    tick.textContent = timelineLabel(frame);
+    tick.dataset.index = String(index);
+    tick.dataset.active = String(index === state.selectedFrame);
+    el.timelineButtons.append(tick);
   });
 }
 
 function wireControls() {
   el.timelineSlider.max = String(TIMELINE.length - 1);
   el.timelineSlider.addEventListener("input", () => selectFrame(Number(el.timelineSlider.value)));
+  el.playButton.addEventListener("click", toggleTimelinePlayback);
+  el.mapFocusButton.addEventListener("click", toggleMapFocus);
   el.gpsButton.addEventListener("click", useGps);
   el.languageButtons.forEach((button) => {
     button.addEventListener("click", () => setLanguage(button.dataset.language));
@@ -506,6 +580,7 @@ async function loadForecast() {
   state.seed = seedResult.status === "fulfilled" ? seedResult.value : null;
   const weatherPayload = weatherResult.status === "fulfilled" ? weatherResult.value : null;
   const marinePayload = marineResult.status === "fulfilled" ? marineResult.value : null;
+  state.quickEvents = buildQuickEvents(weatherPayload, marinePayload);
   state.forecastArchiveCount = archiveForecastSnapshot(weatherPayload, marinePayload);
   const weather = sourceResult("source.weather", weatherResult);
   const marine = sourceResult("source.marine", marineResult);
@@ -564,7 +639,6 @@ function initChartMap() {
     attributionControl: true,
     preferCanvas: true
   }).setView([DEFAULT_LOCATION.latitude, DEFAULT_LOCATION.longitude], 11);
-  L.control.zoom({ position: "bottomright" }).addTo(map);
 
   const streetBase = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxZoom: 18,
@@ -1086,11 +1160,173 @@ function describeConditionKey(weather, marine, confidence) {
   return "condition.partial";
 }
 
+function buildQuickEvents(weather, marine) {
+  const rainPoints = hourlySeries(
+    weather?.hourly?.time,
+    weather?.hourly?.precipitation_probability,
+    (value) => asNumber(value)
+  );
+  const windPoints = hourlySeries(
+    weather?.hourly?.time,
+    weather?.hourly?.wind_speed_10m,
+    (value) => {
+      const speed = asNumber(value);
+      return speed === null ? null : kmhToKnots(speed);
+    }
+  );
+  const wavePoints = hourlySeries(
+    marine?.hourly?.time,
+    marine?.hourly?.wave_height,
+    (value) => asNumber(value)
+  );
+  const rainCandidates = rainPoints.filter((point) => point.value >= RAIN_ALERT_PROBABILITY);
+  return {
+    nextRain: rainCandidates[0] || null,
+    peakRain: maxBy(rainPoints, "value"),
+    windPeak: maxBy(windPoints, "value"),
+    wavePeak: maxBy(wavePoints, "value")
+  };
+}
+
+function hourlySeries(times, values, transform) {
+  if (!Array.isArray(times) || !Array.isArray(values)) return [];
+  const now = Date.now();
+  return times
+    .map((time, index) => {
+      const timestamp = new Date(time).getTime();
+      const value = transform(values[index]);
+      const leadHours = (timestamp - now) / 3600000;
+      return Number.isFinite(timestamp) && value !== null
+        ? { time, timestamp, leadHours, value }
+        : null;
+    })
+    .filter((point) => point && point.leadHours >= -0.5 && point.leadHours <= 48)
+    .sort((a, b) => a.timestamp - b.timestamp);
+}
+
+function maxBy(points, key) {
+  if (!Array.isArray(points) || points.length === 0) return null;
+  return points.reduce((best, point) => (
+    !best || Number(point[key]) > Number(best[key]) ? point : best
+  ), null);
+}
+
+function renderQuickSituation(frame) {
+  if (!frame) return;
+  const events = state.quickEvents || {};
+  const rainText = formatRainEvent(events.nextRain, events.peakRain);
+  const windText = events.windPeak ? formatPeakEvent(events.windPeak, "kn", 0) : "--";
+  const waveText = events.wavePeak ? formatPeakEvent(events.wavePeak, "m", 1) : "--";
+  if (el.nextRain) el.nextRain.textContent = rainText;
+  if (el.rainTiming) el.rainTiming.textContent = rainText;
+  if (el.windTiming) el.windTiming.textContent = windText;
+  if (el.waveTiming) el.waveTiming.textContent = waveText;
+  if (el.eventSummary) el.eventSummary.textContent = priorityEventText(frame, events);
+  if (el.updateState) el.updateState.textContent = state.liveLoadedAt ? shortClock(state.liveLoadedAt) : "--";
+}
+
+function formatRainEvent(nextRain, peakRain) {
+  if (nextRain) {
+    const label = nextRain.leadHours <= 0.5 ? t("event.now") : shortClock(nextRain.timestamp);
+    return formatText("event.at", { time: label, value: `${Math.round(nextRain.value)}%` });
+  }
+  if (peakRain && peakRain.value > 0) {
+    return `${t("event.none48")} (${Math.round(peakRain.value)}%)`;
+  }
+  return t("event.none48");
+}
+
+function formatPeakEvent(point, unit, digits) {
+  const label = point.leadHours <= 0.5 ? t("event.now") : shortClock(point.timestamp);
+  const value = `${Number(point.value).toFixed(digits)} ${unit}`;
+  return formatText("event.peak", { time: label, value });
+}
+
+function priorityEventText(frame, events) {
+  if (frame.confidence < 45) return t("event.lowConfidence");
+  if (events.nextRain && events.nextRain.leadHours <= 6) {
+    return `${t("event.rain")} ${events.nextRain.leadHours <= 0.5 ? t("event.now") : shortClock(events.nextRain.timestamp)}`;
+  }
+  const windPeak = Number(events.windPeak?.value);
+  if (Number.isFinite(windPeak) && windPeak >= 24) return `${t("event.wind")} ${Math.round(windPeak)} kn`;
+  const wavePeak = Number(events.wavePeak?.value);
+  if (Number.isFinite(wavePeak) && wavePeak >= 1.2) return `${t("event.wave")} ${wavePeak.toFixed(1)} m`;
+  return t("event.stable");
+}
+
+function shortClock(value) {
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return "--";
+  return new Intl.DateTimeFormat(state.language, {
+    hour: "2-digit",
+    minute: "2-digit"
+  }).format(date);
+}
+
+function toggleTimelinePlayback() {
+  if (state.isPlaying) {
+    stopTimelinePlayback();
+  } else {
+    startTimelinePlayback();
+  }
+}
+
+function startTimelinePlayback() {
+  if (state.isPlaying) return;
+  if (state.selectedFrame >= TIMELINE.length - 1) selectFrame(0);
+  state.isPlaying = true;
+  updatePlayButton();
+  state.playTimer = window.setInterval(advanceTimelinePlayback, PLAYBACK_INTERVAL_MS);
+}
+
+function stopTimelinePlayback() {
+  state.isPlaying = false;
+  if (state.playTimer) {
+    window.clearInterval(state.playTimer);
+    state.playTimer = null;
+  }
+  updatePlayButton();
+}
+
+function advanceTimelinePlayback() {
+  const nextIndex = state.selectedFrame + 1;
+  if (nextIndex >= TIMELINE.length) {
+    stopTimelinePlayback();
+    return;
+  }
+  selectFrame(nextIndex);
+  if (nextIndex >= TIMELINE.length - 1) {
+    window.setTimeout(stopTimelinePlayback, PLAYBACK_INTERVAL_MS);
+  }
+}
+
+function updatePlayButton() {
+  if (!el.playButton) return;
+  el.playButton.textContent = state.isPlaying ? t("play.pause") : t("play.play");
+  el.playButton.dataset.playing = String(state.isPlaying);
+}
+
+function toggleMapFocus() {
+  state.mapFocus = !state.mapFocus;
+  updateMapFocusState();
+  document.querySelectorAll(".control-menu[open]").forEach((menu) => {
+    menu.open = false;
+  });
+  window.setTimeout(() => state.chart?.map?.invalidateSize(), 80);
+}
+
+function updateMapFocusState() {
+  document.body.classList.toggle("map-focus", state.mapFocus);
+  if (!el.mapFocusButton) return;
+  el.mapFocusButton.textContent = state.mapFocus ? t("mode.focusExit") : t("mode.focus");
+  el.mapFocusButton.dataset.active = String(state.mapFocus);
+}
+
 function selectFrame(index) {
   state.selectedFrame = index;
   el.timelineSlider.value = String(index);
-  document.querySelectorAll(".timeline-buttons button").forEach((button) => {
-    button.setAttribute("aria-pressed", String(Number(button.dataset.index) === index));
+  document.querySelectorAll(".timeline-ticks [data-index]").forEach((tick) => {
+    tick.dataset.active = String(Number(tick.dataset.index) === index);
   });
   renderFrame();
 }
@@ -1117,6 +1353,7 @@ function renderFrame() {
   renderQualityDashboard(frame);
   renderCalculation(frame);
   renderVectors(frame);
+  renderQuickSituation(frame);
   updateChart(frame);
 }
 
