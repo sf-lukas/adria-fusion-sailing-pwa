@@ -1,0 +1,38 @@
+{
+  "schema_version": "adria_fusion_sources_v1",
+  "updated_at": "2026-06-02",
+  "sources": [
+    {
+      "id": "open_meteo_weather",
+      "name": "Open-Meteo Weather API",
+      "url": "https://open-meteo.com/",
+      "role": "Live browser-side weather forecast",
+      "variables": ["temperature_2m", "wind_speed_10m", "wind_direction_10m", "precipitation_probability"],
+      "prototype_status": "active"
+    },
+    {
+      "id": "open_meteo_marine",
+      "name": "Open-Meteo Marine API",
+      "url": "https://open-meteo.com/en/docs/marine-weather-api",
+      "role": "Live browser-side marine forecast",
+      "variables": ["wave_height", "wave_direction", "wave_period", "sea_surface_temperature", "ocean_current_velocity"],
+      "prototype_status": "active_confidence_capped"
+    },
+    {
+      "id": "dhmz_xml_cap",
+      "name": "DHMZ XML and CAP",
+      "url": "https://meteo.hr/",
+      "role": "Croatia observation/warning truth context from local adapter snapshot",
+      "variables": ["temperature_2m", "wind_speed_10m", "weather_text", "CAP warnings"],
+      "prototype_status": "seed_snapshot_active_live_browser_cors_unconfirmed"
+    },
+    {
+      "id": "copernicus_marine",
+      "name": "Copernicus Marine",
+      "url": "https://data.marine.copernicus.eu/",
+      "role": "P1 robust marine grid and map layers",
+      "variables": ["wave", "current", "sea_surface_temperature"],
+      "prototype_status": "planned"
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "name": "Adria Fusion Sailing",
+  "short_name": "Adria Fusion",
+  "description": "Map-first Croatia sailing weather with live weather, marine layers, source health and conservative confidence scoring.",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f5efe0",
+  "theme_color": "#10211f",
+  "categories": ["weather", "navigation", "sports"],
+  "icons": [
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "screenshots/sailing-map-390x844.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Sailing map with forecast layers and source confidence"
+    }
+  ]
+}

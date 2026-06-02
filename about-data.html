@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="styles.css">
+  <title>Data Sources - Adria Fusion Sailing</title>
+</head>
+<body>
+  <main class="content-page">
+    <a href="index.html">Back</a>
+    <h1>Data Sources</h1>
+    <p>The app shows source health and confidence caps because marine forecasts near a coast can be materially wrong.</p>
+    <ul>
+      <li>Open-Meteo Weather API: temperature, wind, precipitation probability.</li>
+      <li>Open-Meteo Marine API: wave height, swell/wind wave fields, sea surface temperature, ocean current model values.</li>
+      <li>DHMZ XML/CAP seed: Croatian observation and warning context from the latest local adapter snapshot.</li>
+      <li>Copernicus Marine, ECMWF and MET Norway are planned as additional independent providers before claiming high-confidence fusion.</li>
+    </ul>
+    <h2>Confidence</h2>
+    <p>Confidence is capped when independent live sources or local truth are missing. The app must show small/limited layers rather than precise-looking visuals when the data basis is weak.</p>
+  </main>
+</body>
+</html>

@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#10211f">
+  <meta name="description" content="Adria Fusion Sailing combines weather and marine forecasts with conservative confidence scoring for Croatia sailing decisions.">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="styles.css">
+  <title>Adria Fusion Sailing</title>
+</head>
+<body>
+  <noscript>This app needs JavaScript to load live forecast data.</noscript>
+  <main class="app-shell">
+    <header class="topbar">
+      <section>
+        <span class="eyebrow">Adria Fusion Sailing</span>
+        <h1 id="placeTitle">Split - Brac Window</h1>
+      </section>
+      <button id="gpsButton" class="icon-button" type="button" aria-label="Use GPS position">
+        <span class="gps-dot" aria-hidden="true"></span>
+        GPS
+      </button>
+    </header>
+
+    <section class="status-strip" aria-label="Data health">
+      <div>
+        <b id="globalConfidence">--</b>
+        <span>confidence</span>
+      </div>
+      <div>
+        <b id="sourceCount">--</b>
+        <span>sources</span>
+      </div>
+      <div>
+        <b id="freshnessState">loading</b>
+        <span>freshness</span>
+      </div>
+      <div>
+        <b id="truthState">seed</b>
+        <span>truth</span>
+      </div>
+    </section>
+
+    <section class="map-card" aria-label="Forecast map">
+      <div class="layer-bar" aria-label="Layer toggles">
+        <button type="button" data-layer="wind" data-active="true">Wind</button>
+        <button type="button" data-layer="wave" data-active="true">Wave</button>
+        <button type="button" data-layer="current" data-active="true">Current</button>
+        <button type="button" data-layer="warnings" data-active="true">Warnings</button>
+      </div>
+
+      <svg id="weatherMap" viewBox="0 0 430 620" role="img" aria-label="Croatia sailing forecast map">
+        <defs>
+          <marker id="windArrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+            <path d="M0,0 L7,3.5 L0,7 Z" fill="#e65b4f"></path>
+          </marker>
+          <marker id="currentArrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+            <path d="M0,0 L7,3.5 L0,7 Z" fill="#2f8a6f"></path>
+          </marker>
+        </defs>
+        <g class="grid">
+          <path d="M0 90H430M0 180H430M0 270H430M0 360H430M0 450H430M0 540H430"></path>
+          <path d="M72 0V620M144 0V620M216 0V620M288 0V620M360 0V620"></path>
+        </g>
+        <path class="coast" d="M0 0H126C107 41 113 78 141 105C168 130 161 161 131 190C105 216 108 246 139 278C168 309 167 338 125 365C90 390 90 423 125 462C153 495 150 531 112 560C85 580 78 599 89 620H0Z"></path>
+        <path class="island island-a" d="M226 162C262 144 307 154 319 188C331 222 287 247 246 238C205 228 190 181 226 162Z"></path>
+        <path class="island island-b" d="M286 345C325 331 371 348 380 384C388 416 341 438 301 424C267 412 254 359 286 345Z"></path>
+        <path class="island island-c" d="M185 474C218 459 254 470 263 496C271 520 240 541 204 534C172 527 157 488 185 474Z"></path>
+
+        <g data-svg-layer="wave">
+          <path class="wave-line" d="M120 108C179 80 239 79 314 102"></path>
+          <path class="wave-line" d="M137 160C201 136 282 139 352 169"></path>
+          <path class="wave-line" d="M135 301C212 264 312 272 401 315"></path>
+          <path class="wave-line" d="M108 431C174 404 279 407 372 451"></path>
+          <path class="wave-line" d="M118 552C190 524 277 535 355 575"></path>
+        </g>
+
+        <g data-svg-layer="warnings">
+          <path id="warningZone" class="warning-zone" d="M242 58C300 38 367 64 391 117C414 167 377 208 312 206C252 204 215 164 214 116C213 87 224 66 242 58Z"></path>
+        </g>
+
+        <path class="route" d="M112 320C159 300 204 284 245 250C282 220 300 200 317 184"></path>
+        <circle id="accuracyRing" class="accuracy" cx="112" cy="320" r="34"></circle>
+        <circle id="positionDot" class="position" cx="112" cy="320" r="8"></circle>
+
+        <g data-svg-layer="wind" id="windLayer"></g>
+        <g data-svg-layer="current" id="currentLayer"></g>
+
+        <g class="harbors">
+          <circle cx="109" cy="318" r="4"></circle>
+          <circle cx="318" cy="184" r="4"></circle>
+          <circle cx="203" cy="496" r="4"></circle>
+        </g>
+      </svg>
+
+      <section class="readout" aria-label="Selected forecast frame">
+        <div>
+          <span id="frameLabel" class="frame-label">Now</span>
+          <h2 id="conditionText">Loading forecast</h2>
+        </div>
+        <div class="metrics">
+          <article><b id="windMetric">--</b><span>wind</span></article>
+          <article><b id="waveMetric">--</b><span>wave</span></article>
+          <article><b id="currentMetric">--</b><span>current</span></article>
+          <article><b id="seaMetric">--</b><span>sea temp</span></article>
+        </div>
+      </section>
+    </section>
+
+    <section class="timeline-card" aria-label="Forecast timeline">
+      <div class="timeline-buttons" id="timelineButtons"></div>
+      <input id="timelineSlider" type="range" min="0" max="6" step="1" value="0" aria-label="Forecast frame">
+    </section>
+
+    <section class="panel-grid">
+      <article class="panel">
+        <h2>Source health</h2>
+        <div id="sourceHealth" class="source-list"></div>
+      </article>
+      <article class="panel">
+        <h2>Calculation</h2>
+        <pre id="calculationBox">Waiting for data...</pre>
+      </article>
+    </section>
+
+    <nav class="bottom-nav" aria-label="App navigation">
+      <a href="#weatherMap">Map</a>
+      <a href="#sourceHealth">Data</a>
+      <a href="privacy.html">Privacy</a>
+      <a href="about-data.html">Sources</a>
+    </nav>
+  </main>
+  <script src="app.js" type="module"></script>
+</body>
+</html>
