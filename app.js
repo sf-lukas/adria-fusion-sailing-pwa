@@ -22,6 +22,7 @@ const FORECAST_ARCHIVE_KEY = "adria_fusion_forecast_archive_v1";
 const MAX_LOCAL_ARCHIVE_SNAPSHOTS = 180;
 const GPS_RELOAD_INTERVAL_MS = 15 * 60 * 1000;
 const GPS_RELOAD_DISTANCE_M = 500;
+const GPS_CENTER_ZOOM = 15;
 const PLAYBACK_INTERVAL_MS = 1250;
 const RAIN_ALERT_PROBABILITY = 40;
 
@@ -97,6 +98,8 @@ const I18N = {
     "gps.fix": "GPS fix",
     "gps.blocked": "GPS blocked",
     "gps.unavailable": "GPS unavailable",
+    "gps.center": "POS",
+    "gps.centerTitle": "Center and zoom to my position",
     "source.weather": "Open-Meteo Weather",
     "source.backendFusion": "Backend Fusion",
     "source.marine": "Open-Meteo Marine",
@@ -198,6 +201,8 @@ const I18N = {
     "gps.fix": "GPS fix",
     "gps.blocked": "GPS blockiert",
     "gps.unavailable": "GPS fehlt",
+    "gps.center": "POS",
+    "gps.centerTitle": "Auf meine Position zentrieren und zoomen",
     "source.weather": "Open-Meteo Wetter",
     "source.backendFusion": "Backend-Fusion",
     "source.marine": "Open-Meteo Marine",
@@ -299,6 +304,8 @@ const I18N = {
     "gps.fix": "GPS fix",
     "gps.blocked": "GPS blok.",
     "gps.unavailable": "GPS nema",
+    "gps.center": "POS",
+    "gps.centerTitle": "Centriraj i priblizi moju poziciju",
     "source.weather": "Open-Meteo vrijeme",
     "source.backendFusion": "Backend fusion",
     "source.marine": "Open-Meteo more",
@@ -405,6 +412,7 @@ const state = {
   gpsWatchId: null,
   lastGpsForecastAt: 0,
   lastGpsForecastLocation: null,
+  lastGpsPosition: null,
   quickEvents: null,
   isPlaying: false,
   playTimer: null,
@@ -419,6 +427,7 @@ const el = {
   languageButtons: document.querySelectorAll("[data-language]"),
   placeTitle: document.getElementById("placeTitle"),
   gpsButton: document.getElementById("gpsButton"),
+  locateButton: document.getElementById("locateButton"),
   globalConfidence: document.getElementById("globalConfidence"),
   sourceCount: document.getElementById("sourceCount"),
   freshnessState: document.getElementById("freshnessState"),
@@ -513,6 +522,7 @@ function applyI18n() {
     button.dataset.active = String(button.dataset.language === state.language);
   });
   updateGpsState(state.gpsLabelKey || "gps.idle");
+  updateLocateButton();
   updatePlayButton();
   updateMapFocusState();
   renderQuickSituation(state.frames[state.selectedFrame]);
@@ -540,6 +550,7 @@ function wireControls() {
   el.playButton.addEventListener("click", toggleTimelinePlayback);
   el.mapFocusButton.addEventListener("click", toggleMapFocus);
   el.gpsButton.addEventListener("click", useGps);
+  el.locateButton?.addEventListener("click", centerOnGpsPosition);
   el.languageButtons.forEach((button) => {
     button.addEventListener("click", () => setLanguage(button.dataset.language));
   });
@@ -1739,6 +1750,7 @@ function useGps() {
     navigator.geolocation.clearWatch(state.gpsWatchId);
     state.gpsWatchId = null;
     updateGpsState("gps.idle");
+    updateLocateButton();
     return;
   }
   updateGpsState("gps.loading");
@@ -1754,9 +1766,62 @@ function useGps() {
   );
 }
 
-async function applyGpsPosition(position, forceReload) {
+function centerOnGpsPosition() {
+  const cached = state.lastGpsPosition || (state.location.id === "gps" ? {
+    latitude: state.location.latitude,
+    longitude: state.location.longitude,
+    accuracy: 120
+  } : null);
+  if (cached) {
+    centerChartOnPosition(cached.latitude, cached.longitude, cached.accuracy, { zoom: GPS_CENTER_ZOOM, animate: true });
+    updateGpsState("gps.live");
+    updateLocateButton();
+    return;
+  }
+  if (!navigator.geolocation) {
+    updateGpsState("gps.unavailable");
+    return;
+  }
+  updateGpsState("gps.loading");
+  navigator.geolocation.getCurrentPosition(
+    (position) => applyGpsPosition(position, true, { centerZoom: GPS_CENTER_ZOOM }),
+    () => updateGpsState("gps.blocked"),
+    { enableHighAccuracy: true, timeout: 8000, maximumAge: 15000 }
+  );
+}
+
+function centerChartOnPosition(latitude, longitude, accuracy, options = {}) {
+  if (!state.chart?.map) return;
+  const center = [latitude, longitude];
+  const radius = Math.max(25, Math.min(1500, Number.isFinite(accuracy) ? accuracy : 120));
+  const { map, positionMarker, accuracyCircle } = state.chart;
+  if (positionMarker) positionMarker.setLatLng(center);
+  if (accuracyCircle) {
+    accuracyCircle.setLatLng(center);
+    accuracyCircle.setRadius(radius);
+  }
+  const targetZoom = Math.max(map.getZoom(), options.zoom || GPS_CENTER_ZOOM);
+  if (typeof map.flyTo === "function" && options.animate !== false) {
+    map.flyTo(center, targetZoom, { animate: true, duration: 0.55 });
+  } else {
+    map.setView(center, targetZoom, { animate: options.animate !== false });
+  }
+  if (el.chartMap) {
+    el.chartMap.dataset.gpsCentered = "true";
+    el.chartMap.dataset.gpsZoom = String(targetZoom);
+  }
+  window.setTimeout(() => map.invalidateSize(), 80);
+}
+
+async function applyGpsPosition(position, forceReload, options = {}) {
   const { latitude, longitude, accuracy } = position.coords;
   const shouldReload = forceReload || shouldReloadGpsForecast(latitude, longitude);
+  state.lastGpsPosition = {
+    latitude,
+    longitude,
+    accuracy,
+    timestamp: Date.now()
+  };
   state.location = {
     id: "gps",
     name: "GPS Position",
@@ -1770,11 +1835,9 @@ async function applyGpsPosition(position, forceReload) {
   el.accuracyRing.setAttribute("cx", "126");
   el.accuracyRing.setAttribute("cy", "308");
   el.accuracyRing.setAttribute("r", String(Math.max(18, Math.min(70, accuracy / 8))));
-  if (state.chart?.accuracyCircle) {
-    state.chart.accuracyCircle.setRadius(Math.max(25, Math.min(1500, accuracy)));
-    state.chart.map.setView([latitude, longitude], Math.max(state.chart.map.getZoom(), 12));
-  }
+  centerChartOnPosition(latitude, longitude, accuracy, { zoom: forceReload ? (options.centerZoom || GPS_CENTER_ZOOM) : 12 });
   updateGpsState("gps.live");
+  updateLocateButton();
   if (shouldReload) {
     state.lastGpsForecastAt = Date.now();
     state.lastGpsForecastLocation = { latitude, longitude };
@@ -1812,6 +1875,14 @@ function updateGpsState(keyOrText) {
   dot.className = "gps-dot";
   dot.setAttribute("aria-hidden", "true");
   el.gpsButton.replaceChildren(dot, document.createTextNode(text));
+}
+
+function updateLocateButton() {
+  if (!el.locateButton) return;
+  el.locateButton.textContent = t("gps.center");
+  el.locateButton.title = t("gps.centerTitle");
+  el.locateButton.setAttribute("aria-label", t("gps.centerTitle"));
+  el.locateButton.dataset.ready = String(Boolean(state.lastGpsPosition || state.location.id === "gps"));
 }
 
 function renderLoadingState() {
