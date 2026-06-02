@@ -15,8 +15,15 @@
       <li>Open-Meteo Weather API: temperature, wind, precipitation probability.</li>
       <li>Open-Meteo Marine API: wave height, swell/wind wave fields, sea surface temperature, ocean current model values.</li>
       <li>DHMZ XML/CAP seed: Croatian observation and warning context from the latest local adapter snapshot.</li>
+      <li>OpenStreetMap Standard Tiles: live base map for prototype positioning and coastline context.</li>
+      <li>OpenSeaMap seamark tiles: visual seamark context for harbor and navigation-aid awareness.</li>
+      <li>EMODnet Bathymetry OGC WMS: mean-depth colour, contour and quality-index overlays for European sea depth context.</li>
+      <li>GEBCO WMS: global shaded bathymetry relief context.</li>
+      <li>HHI/authorized ENC distributors: official Croatian chart data is required for navigation-grade product claims and is not bundled in this prototype.</li>
       <li>Copernicus Marine, ECMWF and MET Norway are planned as additional independent providers before claiming high-confidence fusion.</li>
     </ul>
+    <h2>Navigation limits</h2>
+    <p>Depth, contour, seamark and forecast overlays are planning context only. They are not an official nautical chart and must not be used as the sole basis for safety at sea.</p>
     <h2>Confidence</h2>
     <p>Confidence is capped when independent live sources or local truth are missing. The app must show small/limited layers rather than precise-looking visuals when the data basis is weak.</p>
   </main>

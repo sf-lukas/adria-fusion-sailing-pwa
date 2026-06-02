@@ -33,6 +33,46 @@
       "role": "P1 robust marine grid and map layers",
       "variables": ["wave", "current", "sea_surface_temperature"],
       "prototype_status": "planned"
+    },
+    {
+      "id": "openstreetmap_tiles",
+      "name": "OpenStreetMap Standard Tiles",
+      "url": "https://operations.osmfoundation.org/policies/tiles/",
+      "role": "Prototype live base map for visual positioning",
+      "variables": ["roads", "coastline", "places", "harbors"],
+      "prototype_status": "active_prototype_tile_policy_limited"
+    },
+    {
+      "id": "openseamap_seamarks",
+      "name": "OpenSeaMap Seamark Tiles",
+      "url": "https://wiki.openseamap.org/wiki/h:En:OpenSeaMap_in_Website",
+      "role": "Prototype seamark overlay for maritime context",
+      "variables": ["seamarks", "navigation aids", "harbor marks"],
+      "prototype_status": "active_visual_context_not_official_navigation"
+    },
+    {
+      "id": "emodnet_bathymetry",
+      "name": "EMODnet Bathymetry OGC WMS",
+      "url": "https://ows.emodnet-bathymetry.eu/",
+      "role": "Depth colour and contour overlays for European seas",
+      "variables": ["emodnet:mean_multicolour", "emodnet:contours", "emodnet:quality_index"],
+      "prototype_status": "active_planning_context_not_official_navigation"
+    },
+    {
+      "id": "gebco_wms",
+      "name": "GEBCO WMS",
+      "url": "https://www.gebco.net/data-products/gebco-web-services/web-map-service",
+      "role": "Global shaded bathymetry relief context",
+      "variables": ["GEBCO_LATEST"],
+      "prototype_status": "active_planning_context_not_safety_at_sea"
+    },
+    {
+      "id": "hhi_primar_official_enc",
+      "name": "Croatian official nautical charts / ENC via HHI or authorized distributors",
+      "url": "https://www.hhi.hr/",
+      "role": "Official chart source required before navigation-grade claims",
+      "variables": ["official ENC", "not bundled in prototype"],
+      "prototype_status": "blocked_requires_license_or_distributor_access"
     }
   ]
 }

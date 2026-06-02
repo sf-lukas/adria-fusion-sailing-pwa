@@ -1,4 +1,11 @@
-const CACHE_NAME = "adria-fusion-sailing-v0-3";
+const CACHE_NAME = "adria-fusion-sailing-v0-5";
+const NETWORK_ONLY_HOSTS = new Set([
+  "tile.openstreetmap.org",
+  "tiles.openseamap.org",
+  "ows.emodnet-bathymetry.eu",
+  "wms.gebco.net",
+  "unpkg.com"
+]);
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -34,8 +41,20 @@ self.addEventListener("fetch", (event) => {
     event.respondWith(networkFirst(request));
     return;
   }
+  if (NETWORK_ONLY_HOSTS.has(url.hostname)) {
+    event.respondWith(networkOnly(request));
+    return;
+  }
   event.respondWith(cacheFirst(request));
 });
+
+async function networkOnly(request) {
+  try {
+    return await fetch(request);
+  } catch {
+    return caches.match("./offline.html");
+  }
+}
 
 async function networkFirst(request) {
   try {

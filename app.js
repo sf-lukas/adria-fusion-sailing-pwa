@@ -17,16 +17,81 @@ const TIMELINE = [
   { label: "+48h", hours: 48 }
 ];
 
+const ROUTE_COORDS = [
+  [43.5081, 16.4402],
+  [43.4639, 16.5228],
+  [43.3829, 16.6296],
+  [43.3268, 16.6420],
+  [43.2605, 16.6550]
+];
+
+const HAZARD_POINTS = [
+  {
+    name: "Split channel shoal focus",
+    coords: [43.4405, 16.5150],
+    note: "Check EMODnet contours and official chart before crossing."
+  },
+  {
+    name: "Brac north-coast depth transition",
+    coords: [43.3525, 16.5755],
+    note: "Depth model changes quickly near the coast."
+  },
+  {
+    name: "Hvar approach shallow check",
+    coords: [43.1852, 16.5862],
+    note: "Use the depth/contour layers as planning context only."
+  }
+];
+
+const SHOAL_ZONES = [
+  {
+    name: "Kastela Bay shallow-watch",
+    center: [43.5268, 16.3910],
+    radiusM: 760,
+    level: "caution",
+    note: "Cross-check depth contours and official HHI/ENC before entering shallow water."
+  },
+  {
+    name: "Split channel shallow-watch",
+    center: [43.4378, 16.5148],
+    radiusM: 620,
+    level: "critical",
+    note: "Route-adjacent shallow-water watch zone; verify on official charts."
+  },
+  {
+    name: "Brac north shelf transition",
+    center: [43.3525, 16.5755],
+    radiusM: 900,
+    level: "caution",
+    note: "Fast depth transition close to shore; use contour spacing as risk context."
+  },
+  {
+    name: "Hvar approach shallow-watch",
+    center: [43.1852, 16.5862],
+    radiusM: 820,
+    level: "caution",
+    note: "Planning overlay only; do not use as sole navigation basis."
+  }
+];
+
 const state = {
   location: { ...DEFAULT_LOCATION },
+  mapMode: "chart",
+  baseMode: "nautical",
   selectedFrame: 0,
   frames: [],
   sourceHealth: [],
   seed: null,
-  liveLoadedAt: null
+  liveLoadedAt: null,
+  chart: null,
+  chartLayerHealth: {}
 };
 
 const el = {
+  mapCard: document.querySelector(".map-card"),
+  chartMap: document.getElementById("chartMap"),
+  weatherMap: document.getElementById("weatherMap"),
+  chartStatus: document.getElementById("chartStatus"),
   placeTitle: document.getElementById("placeTitle"),
   gpsButton: document.getElementById("gpsButton"),
   globalConfidence: document.getElementById("globalConfidence"),
@@ -39,6 +104,7 @@ const el = {
   waveMetric: document.getElementById("waveMetric"),
   currentMetric: document.getElementById("currentMetric"),
   seaMetric: document.getElementById("seaMetric"),
+  chartDataState: document.getElementById("chartDataState"),
   timelineButtons: document.getElementById("timelineButtons"),
   timelineSlider: document.getElementById("timelineSlider"),
   sourceHealth: document.getElementById("sourceHealth"),
@@ -56,6 +122,7 @@ async function init() {
   registerServiceWorker();
   buildTimelineControls();
   wireControls();
+  initChartMap();
   renderLoadingState();
   await loadForecast();
 }
@@ -83,12 +150,25 @@ function wireControls() {
   el.timelineSlider.max = String(TIMELINE.length - 1);
   el.timelineSlider.addEventListener("input", () => selectFrame(Number(el.timelineSlider.value)));
   el.gpsButton.addEventListener("click", useGps);
+  document.querySelectorAll("[data-map-mode]").forEach((button) => {
+    button.addEventListener("click", () => setMapMode(button.dataset.mapMode));
+  });
+  document.querySelectorAll("[data-base-mode]").forEach((button) => {
+    button.addEventListener("click", () => setBaseMode(button.dataset.baseMode));
+  });
   document.querySelectorAll("[data-layer]").forEach((button) => {
     button.addEventListener("click", () => {
       const active = button.dataset.active !== "true";
       button.dataset.active = String(active);
       const target = document.querySelector(`[data-svg-layer="${button.dataset.layer}"]`);
       if (target) target.style.display = active ? "" : "none";
+    });
+  });
+  document.querySelectorAll("[data-chart-layer]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const active = button.dataset.active !== "true";
+      button.dataset.active = String(active);
+      toggleChartLayer(button.dataset.chartLayer, active);
     });
   });
 }
@@ -118,14 +198,232 @@ async function loadForecast() {
     mode: "offline",
     message: "Seed snapshot not available"
   };
+  const chart = {
+    name: "Chart Layers",
+    ok: Boolean(state.chart?.ready),
+    mode: state.chart?.ready ? "live" : "fallback",
+    message: state.chart?.ready ? chartLayerSummary() : "Forecast fallback map active"
+  };
+  const officialChart = {
+    name: "HHI/PRIMAR Official ENC",
+    ok: false,
+    mode: "licensed",
+    message: "Not bundled; requires official Croatian chart license/distributor access"
+  };
 
-  state.sourceHealth = [weather, marine, seed];
+  state.sourceHealth = [weather, marine, seed, chart, officialChart];
   state.frames = buildFrames(
     weatherResult.status === "fulfilled" ? weatherResult.value : null,
     marineResult.status === "fulfilled" ? marineResult.value : null,
     state.seed
   );
   selectFrame(0);
+}
+
+function initChartMap() {
+  setMapMode(state.mapMode);
+  if (!window.L || !el.chartMap) {
+    state.chart = { ready: false };
+    setMapMode("forecast");
+    updateChartStatus(null, "Live chart library unavailable; using forecast fallback.");
+    return;
+  }
+
+  const L = window.L;
+  const map = L.map(el.chartMap, {
+    zoomControl: false,
+    attributionControl: true,
+    preferCanvas: true
+  }).setView([DEFAULT_LOCATION.latitude, DEFAULT_LOCATION.longitude], 11);
+  L.control.zoom({ position: "bottomright" }).addTo(map);
+
+  const base = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 18,
+    attribution: "&copy; OpenStreetMap contributors"
+  }).addTo(map);
+  const emodnetMean = L.tileLayer.wms("https://ows.emodnet-bathymetry.eu/wms", {
+    layers: "emodnet:mean_multicolour",
+    format: "image/png",
+    transparent: true,
+    opacity: 0.48,
+    attribution: "EMODnet Bathymetry"
+  });
+  const gebcoRelief = L.tileLayer.wms("https://wms.gebco.net/mapserv?", {
+    layers: "GEBCO_LATEST",
+    format: "image/png",
+    transparent: true,
+    opacity: 0.18,
+    attribution: "GEBCO"
+  });
+  const depth = L.layerGroup([emodnetMean, gebcoRelief]).addTo(map);
+  const contours = L.tileLayer.wms("https://ows.emodnet-bathymetry.eu/wms", {
+    layers: "emodnet:contours",
+    format: "image/png",
+    transparent: true,
+    opacity: 0.68,
+    attribution: "EMODnet depth contours"
+  }).addTo(map);
+  const quality = L.tileLayer.wms("https://ows.emodnet-bathymetry.eu/wms", {
+    layers: "emodnet:quality_index",
+    format: "image/png",
+    transparent: true,
+    opacity: 0.38,
+    attribution: "EMODnet bathymetry quality index"
+  });
+  const seamarks = L.tileLayer("https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png", {
+    maxZoom: 18,
+    attribution: "Seamark data &copy; OpenSeaMap contributors",
+    opacity: 0.9
+  }).addTo(map);
+  registerLayerHealth("OSM", base);
+  registerLayerHealth("EMODnet depth", emodnetMean);
+  registerLayerHealth("GEBCO relief", gebcoRelief);
+  registerLayerHealth("EMODnet contours", contours);
+  registerLayerHealth("EMODnet quality", quality);
+  registerLayerHealth("OpenSeaMap seamarks", seamarks);
+
+  const route = L.layerGroup().addTo(map);
+  L.polyline(ROUTE_COORDS, {
+    color: "#fffdf7",
+    weight: 5,
+    opacity: 0.95
+  }).addTo(route);
+  L.polyline(ROUTE_COORDS, {
+    color: "#10211f",
+    weight: 2,
+    dashArray: "8 7",
+    opacity: 0.75
+  }).addTo(route);
+  HAZARD_POINTS.forEach((point) => {
+    L.marker(point.coords, {
+      icon: L.divIcon({
+        className: "",
+        html: "<span class=\"hazard-marker\">!</span>",
+        iconSize: [24, 24],
+        iconAnchor: [12, 12]
+      })
+    }).bindTooltip(`<b>${point.name}</b><br>${point.note}`).addTo(route);
+  });
+  const shoals = L.layerGroup().addTo(map);
+  SHOAL_ZONES.forEach((zone) => {
+    L.circle(zone.center, {
+      radius: zone.radiusM,
+      color: zone.level === "critical" ? "#e65b4f" : "#c67b2e",
+      fillColor: zone.level === "critical" ? "#e65b4f" : "#c67b2e",
+      fillOpacity: zone.level === "critical" ? 0.18 : 0.12,
+      weight: zone.level === "critical" ? 2 : 1.5,
+      dashArray: "6 5"
+    }).bindTooltip(`<b>${zone.name}</b><br>${zone.note}`).addTo(shoals);
+  });
+
+  const meteo = L.layerGroup().addTo(map);
+  const positionMarker = L.marker([DEFAULT_LOCATION.latitude, DEFAULT_LOCATION.longitude], {
+    icon: L.divIcon({
+      className: "",
+      html: "<span class=\"chart-marker\"></span>",
+      iconSize: [18, 18],
+      iconAnchor: [9, 9]
+    })
+  }).addTo(map);
+  const accuracyCircle = L.circle([DEFAULT_LOCATION.latitude, DEFAULT_LOCATION.longitude], {
+    radius: 120,
+    color: "#10211f",
+    fillColor: "#2f8a6f",
+    fillOpacity: 0.08,
+    weight: 1
+  }).addTo(map);
+
+  state.chart = {
+    ready: true,
+    map,
+    layers: { base, depth, contours, seamarks, shoals, quality, route },
+    baseLayers: { base, emodnetMean, gebcoRelief },
+    meteo,
+    positionMarker,
+    accuracyCircle
+  };
+  setBaseMode(state.baseMode);
+  map.on("click", (event) => queryDepthAt(event.latlng));
+  window.setTimeout(() => map.invalidateSize(), 80);
+}
+
+function setMapMode(mode) {
+  state.mapMode = mode === "forecast" ? "forecast" : "chart";
+  if (el.mapCard) el.mapCard.dataset.mode = state.mapMode;
+  if (el.weatherMap) el.weatherMap.hidden = state.mapMode !== "forecast";
+  document.querySelectorAll("[data-map-mode]").forEach((button) => {
+    button.dataset.active = String(button.dataset.mapMode === state.mapMode);
+  });
+  if (state.mapMode === "chart" && state.chart?.map) {
+    window.setTimeout(() => state.chart.map.invalidateSize(), 40);
+  }
+}
+
+function setBaseMode(mode) {
+  state.baseMode = ["nautical", "street", "depth"].includes(mode) ? mode : "nautical";
+  document.querySelectorAll("[data-base-mode]").forEach((button) => {
+    button.dataset.active = String(button.dataset.baseMode === state.baseMode);
+  });
+  if (!state.chart?.ready) return;
+  const { base, depth, contours, seamarks, shoals, quality, route } = state.chart.layers;
+  const wanted = {
+    nautical: { depth: true, contours: true, seamarks: true, shoals: true, quality: false, route: true, depthOpacity: 0.48, reliefOpacity: 0.18 },
+    street: { depth: false, contours: false, seamarks: true, shoals: true, quality: false, route: true, depthOpacity: 0.24, reliefOpacity: 0.1 },
+    depth: { depth: true, contours: true, seamarks: false, shoals: true, quality: true, route: true, depthOpacity: 0.72, reliefOpacity: 0.28 }
+  }[state.baseMode];
+
+  if (!state.chart.map.hasLayer(base)) base.addTo(state.chart.map);
+  Object.entries(wanted).forEach(([name, active]) => {
+    if (name.endsWith("Opacity")) return;
+    const layer = { depth, contours, seamarks, shoals, quality, route }[name];
+    const button = document.querySelector(`[data-chart-layer="${name}"]`);
+    if (button) button.dataset.active = String(active);
+    setLayerActive(layer, Boolean(active));
+  });
+  state.chart.baseLayers.emodnetMean.setOpacity(wanted.depthOpacity);
+  state.chart.baseLayers.gebcoRelief.setOpacity(wanted.reliefOpacity);
+  updateChartStatus(state.frames[state.selectedFrame]);
+}
+
+function toggleChartLayer(name, active) {
+  if (!state.chart?.map || !state.chart.layers?.[name]) return;
+  setLayerActive(state.chart.layers[name], active);
+  updateChartStatus(state.frames[state.selectedFrame]);
+}
+
+function setLayerActive(layer, active) {
+  if (!state.chart?.map || !layer) return;
+  if (active && !state.chart.map.hasLayer(layer)) {
+    layer.addTo(state.chart.map);
+  } else if (!active && state.chart.map.hasLayer(layer)) {
+    state.chart.map.removeLayer(layer);
+  }
+}
+
+function registerLayerHealth(name, layer) {
+  state.chartLayerHealth[name] = { ok: true, errors: 0 };
+  layer.on("tileload", () => {
+    state.chartLayerHealth[name] = { ...state.chartLayerHealth[name], ok: true };
+    updateChartDataState();
+  });
+  layer.on("tileerror", () => {
+    const current = state.chartLayerHealth[name] || { ok: true, errors: 0 };
+    state.chartLayerHealth[name] = { ok: false, errors: current.errors + 1 };
+    updateChartDataState();
+  });
+}
+
+function chartLayerSummary() {
+  const entries = Object.entries(state.chartLayerHealth);
+  if (!entries.length) return "OSM, OpenSeaMap and EMODnet configured";
+  const failed = entries.filter(([, value]) => !value.ok);
+  if (failed.length === 0) return "OSM, OpenSeaMap, EMODnet depth/contours and GEBCO available";
+  return `Layer warning: ${failed.map(([name]) => name).join(", ")}`;
+}
+
+function updateChartDataState(message) {
+  if (!el.chartDataState) return;
+  el.chartDataState.textContent = message || `${chartLayerSummary()}. Official ENC/HHI charts are not bundled.`;
 }
 
 async function loadSeed() {
@@ -384,6 +682,7 @@ function renderFrame() {
   renderSourceHealth();
   renderCalculation(frame);
   renderVectors(frame);
+  updateChart(frame);
 }
 
 function renderSourceHealth() {
@@ -407,12 +706,14 @@ function renderCalculation(frame) {
   const capLine = frame.sources < 2 ? "cap=60 because fewer than two independent live forecast sources" : "cap=72 prototype cap";
   const weatherLine = `wind=${windKn ?? "na"}kn, temp=${frame.weather.temperature ?? "na"}C`;
   const marineLine = `wave=${frame.marine.waveHeight ?? "na"}m, current=${kmhToKnots(frame.marine.currentVelocityKmh) ?? "na"}kn`;
+  const chartLine = `chart=${state.baseMode}, depth=EMODnet, seamarks=OpenSeaMap, official_enc=not_bundled`;
   const confidenceLine = `confidence=${frame.confidence}/100, mode=${frame.condition}`;
   el.calculationBox.textContent = [
     sourceLine,
     capLine,
     weatherLine,
     marineLine,
+    chartLine,
     confidenceLine,
     "",
     "planned fusion:",
@@ -441,6 +742,170 @@ function renderVectors(frame) {
   });
   const warningVisible = frame.confidence < 48 || (frame.weather.precipitationProbability ?? 0) > 55;
   el.warningZone.style.opacity = warningVisible ? "1" : ".35";
+}
+
+function updateChart(frame) {
+  if (!state.chart?.ready || !frame) return;
+  const { map, meteo, positionMarker, accuracyCircle } = state.chart;
+  const center = [state.location.latitude, state.location.longitude];
+  positionMarker.setLatLng(center);
+  accuracyCircle.setLatLng(center);
+  accuracyCircle.setRadius(state.location.id === "gps" ? Number(accuracyCircle.options.radius || 120) : 180);
+  meteo.clearLayers();
+
+  const windKn = kmhToKnots(frame.weather.windSpeedKmh);
+  const currentKn = kmhToKnots(frame.marine.currentVelocityKmh);
+  addVectorMarker(meteo, destination(center, 315, 3.5), frame.weather.windDirection ?? 300, "wind", `Wind ${windKn ?? "--"} kn`);
+  addVectorMarker(meteo, destination(center, 128, 3.5), frame.marine.currentDirection ?? 42, "current", `Current ${currentKn ?? "--"} kn`);
+
+  const confidenceColor = frame.confidence < 48 ? "#e65b4f" : frame.confidence < 60 ? "#c67b2e" : "#2f8a6f";
+  accuracyCircle.setStyle({ color: confidenceColor, fillColor: confidenceColor });
+  positionMarker.bindTooltip(
+    `<b>${state.location.routeName || state.location.name}</b><br>${frame.label}: ${frame.condition}<br>Wave ${valueText(frame.marine.waveHeight, "m", 1)}`
+  );
+  if (!map.getBounds().pad(-0.18).contains(center)) {
+    map.setView(center, Math.max(map.getZoom(), 10), { animate: false });
+  }
+  updateChartStatus(frame);
+}
+
+async function queryDepthAt(latlng) {
+  if (!state.chart?.ready || !window.L) return;
+  const L = window.L;
+  const map = state.chart.map;
+  const popup = L.popup({ closeButton: true, autoPan: true })
+    .setLatLng(latlng)
+    .setContent("Depth query...")
+    .openOn(map);
+  try {
+    const response = await fetch(buildDepthInfoUrl(latlng), { cache: "no-store" });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const text = await response.text();
+    const depthText = extractDepthText(text);
+    popup.setContent([
+      `<b>${escapeHtml(depthText.title)}</b>`,
+      escapeHtml(depthText.detail),
+      "<small>EMODnet planning data. Verify against official chart before navigation.</small>"
+    ].join("<br>"));
+    const stateText = depthText.title === "No point depth returned"
+      ? "Depth query reached EMODnet, but no numeric point depth was returned; use contours and official chart."
+      : "Depth query returned EMODnet point context; official ENC/HHI chart still required for navigation.";
+    updateChartDataState(stateText);
+  } catch (error) {
+    popup.setContent([
+      "<b>Depth query unavailable</b>",
+      escapeHtml(error.message || "No point value returned"),
+      "<small>Keep depth/contour layers as visual planning context only.</small>"
+    ].join("<br>"));
+    updateChartDataState("Depth point query failed; map layers remain visual planning context.");
+  }
+}
+
+function buildDepthInfoUrl(latlng) {
+  const map = state.chart.map;
+  const point = map.latLngToContainerPoint(latlng, map.getZoom());
+  const size = map.getSize();
+  const bounds = map.getBounds();
+  const crs = map.options.crs;
+  const sw = crs.project(bounds.getSouthWest());
+  const ne = crs.project(bounds.getNorthEast());
+  const params = new URLSearchParams({
+    service: "WMS",
+    request: "GetFeatureInfo",
+    version: "1.3.0",
+    layers: "emodnet:mean_multicolour",
+    query_layers: "emodnet:mean_multicolour",
+    styles: "",
+    crs: "EPSG:3857",
+    bbox: `${sw.x},${sw.y},${ne.x},${ne.y}`,
+    width: String(size.x),
+    height: String(size.y),
+    format: "image/png",
+    transparent: "true",
+    info_format: "application/json",
+    i: String(Math.round(point.x)),
+    j: String(Math.round(point.y))
+  });
+  return `https://ows.emodnet-bathymetry.eu/wms?${params}`;
+}
+
+function extractDepthText(text) {
+  try {
+    const data = JSON.parse(text);
+    const props = data.features?.[0]?.properties || {};
+    const entries = Object.entries(props);
+    const candidate = entries.find(([key]) => /depth|mean|value|gray|pixel/i.test(key));
+    if (candidate) {
+      const value = Number(candidate[1]);
+      if (Number.isFinite(value)) {
+        const sign = value > 0 ? -value : value;
+        return { title: "EMODnet point depth", detail: `approx ${Math.abs(sign).toFixed(1)} m below reference surface` };
+      }
+      return { title: "EMODnet point attribute", detail: `${candidate[0]}=${String(candidate[1])}` };
+    }
+  } catch {
+    const compact = text.replace(/\s+/g, " ").trim();
+    if (compact) return { title: "EMODnet response", detail: compact.slice(0, 120) };
+  }
+  return { title: "No point depth returned", detail: "Use visible depth colour, contours and official chart cross-check." };
+}
+
+function addVectorMarker(layer, coords, direction, kind, label) {
+  const L = window.L;
+  const rotation = Number.isFinite(Number(direction)) ? Number(direction) : 0;
+  L.marker(coords, {
+    icon: L.divIcon({
+      className: "",
+      html: `<span class="vector-marker ${kind}" title="${label}"><span style="display:block;transform:rotate(${rotation}deg)">↑</span></span>`,
+      iconSize: [30, 30],
+      iconAnchor: [15, 15]
+    })
+  }).bindTooltip(label).addTo(layer);
+}
+
+function destination(center, bearingDegrees, distanceKm) {
+  const radiusKm = 6371;
+  const bearing = bearingDegrees * Math.PI / 180;
+  const lat1 = center[0] * Math.PI / 180;
+  const lon1 = center[1] * Math.PI / 180;
+  const angular = distanceKm / radiusKm;
+  const lat2 = Math.asin(
+    Math.sin(lat1) * Math.cos(angular) +
+    Math.cos(lat1) * Math.sin(angular) * Math.cos(bearing)
+  );
+  const lon2 = lon1 + Math.atan2(
+    Math.sin(bearing) * Math.sin(angular) * Math.cos(lat1),
+    Math.cos(angular) - Math.sin(lat1) * Math.sin(lat2)
+  );
+  return [lat2 * 180 / Math.PI, lon2 * 180 / Math.PI];
+}
+
+function updateChartStatus(frame, override) {
+  if (!el.chartStatus) return;
+  if (override) {
+    el.chartStatus.textContent = override;
+    return;
+  }
+  if (!frame) {
+    el.chartStatus.textContent = "Chart layers: OSM base, OpenSeaMap seamarks, EMODnet depth/contours.";
+    return;
+  }
+  const windKn = kmhToKnots(frame.weather.windSpeedKmh);
+  const activeLayers = state.chart?.layers
+    ? Object.entries(state.chart.layers)
+      .filter(([, layer]) => state.chart.map.hasLayer(layer))
+      .map(([name]) => name)
+      .filter((name) => name !== "base")
+      .join("/")
+    : "na";
+  el.chartStatus.textContent = [
+    `Map ${state.baseMode} ${frame.label}: confidence ${frame.confidence}/100`,
+    `layers ${activeLayers || "base"}`,
+    `wind ${windKn ?? "--"} kn`,
+    `wave ${valueText(frame.marine.waveHeight, "m", 1)}`,
+    "depth/shallows are planning context"
+  ].join(" | ");
+  updateChartDataState();
 }
 
 function vectorPath(x, y, directionDegrees, length, className) {
@@ -475,6 +940,10 @@ function useGps() {
       el.accuracyRing.setAttribute("cx", "126");
       el.accuracyRing.setAttribute("cy", "308");
       el.accuracyRing.setAttribute("r", String(Math.max(18, Math.min(70, accuracy / 8))));
+      if (state.chart?.accuracyCircle) {
+        state.chart.accuracyCircle.setRadius(Math.max(25, Math.min(1500, accuracy)));
+        state.chart.map.setView([latitude, longitude], Math.max(state.chart.map.getZoom(), 12));
+      }
       updateGpsState("GPS fix");
       await loadForecast();
     },
@@ -520,4 +989,13 @@ function dirText(degrees) {
   if (degrees === null || degrees === undefined || Number.isNaN(Number(degrees))) return "--";
   const dirs = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
   return dirs[Math.round(Number(degrees) / 45) % 8];
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }
