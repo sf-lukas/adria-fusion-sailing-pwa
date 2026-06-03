@@ -8,6 +8,7 @@ const FORECAST_SOURCE_IDS = new Set([
 const MAP_SOURCE_IDS = new Set([
   "openstreetmap_tiles",
   "esri_world_imagery",
+  "rainviewer_radar",
   "openseamap_seamarks",
   "emodnet_bathymetry",
   "gebco_wms",
@@ -34,9 +35,15 @@ const WEIGHTS = [
     status: "seed verification"
   },
   {
+    name: "RainViewer Radar",
+    weight: 0,
+    role: "Near-now radar visualization only. It confirms active rain structure but does not raise forecast confidence.",
+    status: "active map layer, no forecast weight"
+  },
+  {
     name: "Mediterranean forecast grid",
     weight: 0,
-    role: "Map visualization only: sampled Open-Meteo sea-area points for rain and wind field awareness.",
+    role: "Map visualization only: batched Open-Meteo sea-area grid for rain and wind field awareness.",
     status: "not used to raise confidence"
   }
 ];
@@ -143,8 +150,10 @@ function renderCalculationContract(split) {
     `provider_count=${providerNames.length || "seed_unknown"} providers=[${providerNames.join(",") || "none"}]`,
     "current_prototype_weights: weather=0.42, marine=0.42, seed=0.16, mediterranean_grid=0.00",
     "confidence cap: <=78 until independent live forecast fusion and truth verification are both present",
-    "rain map: color/radius from precipitation/rain/showers in mm per hour, probability only as label context",
-    "wind map: arrows from wind_speed_10m, wind_direction_10m and wind_gusts_10m, displayed in knots",
+    "rain radar: RainViewer tiles are near-now observation context only, confidence_weight=0.00",
+    "rain forecast map: color/radius from Open-Meteo precipitation/rain/showers in mm per hour, probability only as label context",
+    "wind map: dense Mediterranean Open-Meteo grid arrows from wind_speed_10m, wind_direction_10m and wind_gusts_10m, displayed in knots",
+    "animation: 49 hourly frames from now to +48h; slider/playback uses each hour",
     "future adaptive formula:",
     "corrected = forecast - bias",
     "loss = EWMA(abs(corrected-observed)/scale)",

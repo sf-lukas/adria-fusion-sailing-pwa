@@ -7,15 +7,11 @@ const DEFAULT_LOCATION = {
   timezone: "Europe/Zagreb"
 };
 
-const TIMELINE = [
-  { key: "now", label: "Now", hours: 0 },
-  { key: "h1", label: "+1h", hours: 1 },
-  { key: "h3", label: "+3h", hours: 3 },
-  { key: "h6", label: "+6h", hours: 6 },
-  { key: "h12", label: "+12h", hours: 12 },
-  { key: "h24", label: "+24h", hours: 24 },
-  { key: "h48", label: "+48h", hours: 48 }
-];
+const TIMELINE = Array.from({ length: 49 }, (_, hours) => ({
+  key: hours === 0 ? "now" : `h${hours}`,
+  label: hours === 0 ? "Now" : `+${hours}h`,
+  hours
+}));
 
 const LANGUAGE_KEY = "adria_fusion_language";
 const FORECAST_ARCHIVE_KEY = "adria_fusion_forecast_archive_v1";
@@ -26,21 +22,57 @@ const GPS_CENTER_ZOOM = 15;
 const PLAYBACK_INTERVAL_MS = 1250;
 const RAIN_ALERT_PROBABILITY = 40;
 const RAIN_ALERT_MM_PER_H = 0.3;
-const MEDITERRANEAN_BOUNDS = [[30.2, -6.0], [46.3, 36.8]];
-const MEDITERRANEAN_POINTS = [
-  { id: "adria_north", label: "North Adriatic", latitude: 45.2, longitude: 13.4, timezone: "Europe/Zagreb" },
-  { id: "adria_mid", label: "Mid Adriatic", latitude: 43.7, longitude: 15.4, timezone: "Europe/Zagreb" },
-  { id: "adria_south", label: "South Adriatic", latitude: 42.4, longitude: 17.6, timezone: "Europe/Zagreb" },
-  { id: "ionian", label: "Ionian Sea", latitude: 38.7, longitude: 19.7, timezone: "Europe/Zagreb" },
-  { id: "aegean", label: "Aegean Sea", latitude: 37.8, longitude: 24.4, timezone: "Europe/Zagreb" },
-  { id: "crete", label: "Crete Sea", latitude: 35.3, longitude: 25.1, timezone: "Europe/Zagreb" },
-  { id: "sicily", label: "Sicily Channel", latitude: 37.1, longitude: 13.4, timezone: "Europe/Zagreb" },
-  { id: "tyrrhenian", label: "Tyrrhenian Sea", latitude: 40.0, longitude: 12.0, timezone: "Europe/Zagreb" },
-  { id: "ligurian", label: "Ligurian Sea", latitude: 43.5, longitude: 8.8, timezone: "Europe/Zagreb" },
-  { id: "balearic", label: "Balearic Sea", latitude: 39.2, longitude: 3.0, timezone: "Europe/Zagreb" },
-  { id: "alboran", label: "Alboran Sea", latitude: 36.0, longitude: -3.2, timezone: "Europe/Zagreb" },
-  { id: "levante", label: "Levantine Sea", latitude: 34.5, longitude: 31.0, timezone: "Europe/Zagreb" }
+const WEATHER_CURRENT_FIELDS = [
+  "temperature_2m",
+  "relative_humidity_2m",
+  "wind_speed_10m",
+  "wind_direction_10m",
+  "wind_gusts_10m",
+  "precipitation",
+  "rain",
+  "showers",
+  "weather_code"
 ];
+const WEATHER_HOURLY_FIELDS = [
+  "temperature_2m",
+  "precipitation",
+  "rain",
+  "showers",
+  "precipitation_probability",
+  "wind_speed_10m",
+  "wind_direction_10m",
+  "wind_gusts_10m"
+];
+const MEDITERRANEAN_BOUNDS = [[30.2, -6.0], [46.3, 36.8]];
+const MEDITERRANEAN_GRID_REGIONS = [
+  { id: "west", label: "West Med", latitudes: [36, 38, 40, 42], longitudes: [-5, -2, 1, 4, 7] },
+  { id: "tyrrhenian", label: "Tyrrhenian", latitudes: [38, 40, 42, 44], longitudes: [8, 10, 12, 14] },
+  { id: "adria", label: "Adriatic", latitudes: [41.5, 43, 44.5, 45.5], longitudes: [13, 15, 17] },
+  { id: "ionian_aegean", label: "Ionian/Aegean", latitudes: [35, 37, 39, 41], longitudes: [18, 21, 24, 27] },
+  { id: "levantine", label: "Levantine", latitudes: [33.5, 35.5, 37.5], longitudes: [28, 31, 34, 36] },
+  { id: "south_central", label: "South Central", latitudes: [32, 34, 36], longitudes: [8, 12, 16, 20, 24] }
+];
+const MEDITERRANEAN_POINTS = buildMediterraneanGrid();
+const MEDITERRANEAN_BATCH_SIZE = 12;
+const RAINVIEWER_API_URL = "https://api.rainviewer.com/public/weather-maps.json";
+
+function buildMediterraneanGrid() {
+  const points = [];
+  MEDITERRANEAN_GRID_REGIONS.forEach((region) => {
+    region.latitudes.forEach((latitude) => {
+      region.longitudes.forEach((longitude) => {
+        points.push({
+          id: `${region.id}_${String(latitude).replace(".", "p")}_${String(longitude).replace("-", "m").replace(".", "p")}`,
+          label: `${region.label} ${latitude.toFixed(1)}N ${longitude.toFixed(1)}E`,
+          latitude,
+          longitude,
+          timezone: "Europe/Zagreb"
+        });
+      });
+    });
+  });
+  return points;
+}
 
 const I18N = {
   en: {
@@ -102,7 +134,9 @@ const I18N = {
     "timeline.h3": "+3h",
     "timeline.h6": "+6h",
     "timeline.h12": "+12h",
+    "timeline.h18": "+18h",
     "timeline.h24": "+24h",
+    "timeline.h36": "+36h",
     "timeline.h48": "+48h",
     "frame.suffix": "frame",
     "condition.loading": "Loading forecast",
@@ -125,6 +159,7 @@ const I18N = {
     "source.seed": "DHMZ Seed Truth",
     "source.archive": "Local Forecast Archive",
     "source.mediterranean": "Mediterranean Forecast Grid",
+    "source.rainRadar": "RainViewer Radar",
     "source.chart": "Chart Layers",
     "source.official": "HHI/PRIMAR Official ENC",
     "quality.forecast": "Forecast",
@@ -209,7 +244,9 @@ const I18N = {
     "timeline.h3": "+3h",
     "timeline.h6": "+6h",
     "timeline.h12": "+12h",
+    "timeline.h18": "+18h",
     "timeline.h24": "+24h",
+    "timeline.h36": "+36h",
     "timeline.h48": "+48h",
     "frame.suffix": "Frame",
     "condition.loading": "Forecast laedt",
@@ -232,6 +269,7 @@ const I18N = {
     "source.seed": "DHMZ Seed Truth",
     "source.archive": "Lokales Forecast-Archiv",
     "source.mediterranean": "Mittelmeer Forecast-Grid",
+    "source.rainRadar": "RainViewer Radar",
     "source.chart": "Kartenlayer",
     "source.official": "HHI/PRIMAR amtliche ENC",
     "quality.forecast": "Forecast",
@@ -316,7 +354,9 @@ const I18N = {
     "timeline.h3": "+3h",
     "timeline.h6": "+6h",
     "timeline.h12": "+12h",
+    "timeline.h18": "+18h",
     "timeline.h24": "+24h",
+    "timeline.h36": "+36h",
     "timeline.h48": "+48h",
     "frame.suffix": "okvir",
     "condition.loading": "Prognoza se ucitava",
@@ -339,6 +379,7 @@ const I18N = {
     "source.seed": "DHMZ seed truth",
     "source.archive": "Lokalna arhiva prognoze",
     "source.mediterranean": "Mediteranska prognozna mreza",
+    "source.rainRadar": "RainViewer radar",
     "source.chart": "Slojevi karte",
     "source.official": "HHI/PRIMAR sluzbena ENC",
     "quality.forecast": "Prognoza",
@@ -446,7 +487,8 @@ const state = {
   playTimer: null,
   mapFocus: false,
   playbackSpeed: 1,
-  regionalWeather: null
+  regionalWeather: null,
+  rainRadar: null
 };
 
 const el = {
@@ -566,22 +608,39 @@ function applyI18n() {
 }
 
 function timelineLabel(item) {
-  return t(`timeline.${item.key}`) || item.label;
+  const key = `timeline.${item.key}`;
+  const translated = t(key);
+  return translated === key ? item.label : translated;
 }
 
 function buildTimelineControls() {
   el.timelineButtons.replaceChildren();
-  TIMELINE.forEach((frame, index) => {
+  timelineTickIndexes().forEach((index) => {
+    const frame = TIMELINE[index] || TIMELINE[0];
     const tick = document.createElement("span");
     tick.textContent = timelineLabel(frame);
     tick.dataset.index = String(index);
     tick.dataset.active = String(index === state.selectedFrame);
     el.timelineButtons.append(tick);
   });
+  if (el.timelineSlider) {
+    el.timelineSlider.max = String(timelineLength() - 1);
+  }
+}
+
+function timelineLength() {
+  return Math.max(1, state.frames.length || TIMELINE.length);
+}
+
+function timelineTickIndexes() {
+  const max = timelineLength() - 1;
+  const preferred = [0, 1, 3, 6, 12, 18, 24, 36, 48, state.selectedFrame]
+    .filter((index) => index >= 0 && index <= max);
+  return [...new Set(preferred)].sort((a, b) => a - b);
 }
 
 function wireControls() {
-  el.timelineSlider.max = String(TIMELINE.length - 1);
+  el.timelineSlider.max = String(timelineLength() - 1);
   el.timelineSlider.addEventListener("input", () => selectFrame(Number(el.timelineSlider.value)));
   el.playButton.addEventListener("click", toggleTimelinePlayback);
   el.mapFocusButton.addEventListener("click", toggleMapFocus);
@@ -642,17 +701,22 @@ async function loadForecast() {
   const weatherPromise = fetchWeather(state.location);
   const marinePromise = fetchMarine(state.location);
   const regionalPromise = fetchMediterraneanWeather();
-  const [seedResult, weatherResult, marineResult, regionalResult] = await Promise.allSettled([
+  const rainRadarPromise = fetchRainViewerTimeline();
+  const [seedResult, weatherResult, marineResult, regionalResult, rainRadarResult] = await Promise.allSettled([
     seedPromise,
     weatherPromise,
     marinePromise,
-    regionalPromise
+    regionalPromise,
+    rainRadarPromise
   ]);
 
   state.seed = seedResult.status === "fulfilled" ? seedResult.value : null;
   const weatherPayload = weatherResult.status === "fulfilled" ? weatherResult.value : null;
   const marinePayload = marineResult.status === "fulfilled" ? marineResult.value : null;
   state.regionalWeather = regionalResult.status === "fulfilled" ? regionalResult.value : null;
+  state.rainRadar = rainRadarResult.status === "fulfilled"
+    ? rainRadarResult.value
+    : { sourceOk: false, frames: [], message: rainRadarResult.reason?.message || "Rain radar not available" };
   state.quickEvents = buildQuickEvents(weatherPayload, marinePayload);
   state.forecastArchiveCount = archiveForecastSnapshot(weatherPayload, marinePayload);
   const weather = sourceResult("source.weather", weatherResult);
@@ -679,12 +743,20 @@ async function loadForecast() {
     nameKey: "source.mediterranean",
     ok: state.regionalWeather.sourceOk,
     mode: state.regionalWeather.sourceOk ? "live" : "limited",
-    message: `${state.regionalWeather.points.length}/${state.regionalWeather.requested} Open-Meteo sea-area samples loaded`
+    message: `${state.regionalWeather.points.length}/${state.regionalWeather.requested} Open-Meteo sea-area samples loaded in ${state.regionalWeather.batches} batches`
   } : {
     nameKey: "source.mediterranean",
     ok: false,
     mode: "offline",
     message: "Regional visualization grid not available"
+  };
+  const rainRadar = {
+    nameKey: "source.rainRadar",
+    ok: Boolean(state.rainRadar?.sourceOk),
+    mode: state.rainRadar?.sourceOk ? "radar" : "limited",
+    message: state.rainRadar?.sourceOk
+      ? `${state.rainRadar.frames.length} RainViewer radar frames for near-now rain only`
+      : (state.rainRadar?.message || "Radar layer not available")
   };
   const chart = {
     nameKey: "source.chart",
@@ -699,7 +771,7 @@ async function loadForecast() {
     message: "Not bundled; requires official Croatian chart license/distributor access"
   };
 
-  state.sourceHealth = [weather, backendFusion, marine, seed, localArchive, regionalGrid, chart, officialChart];
+  state.sourceHealth = [weather, backendFusion, marine, rainRadar, seed, localArchive, regionalGrid, chart, officialChart];
   state.frames = buildFrames(
     weatherPayload,
     marinePayload,
@@ -813,6 +885,8 @@ function initChartMap() {
 
   const meteo = L.layerGroup().addTo(map);
   const rain = L.layerGroup().addTo(map);
+  const rainRadar = L.layerGroup().addTo(rain);
+  const rainSamples = L.layerGroup().addTo(rain);
   const positionMarker = L.marker([DEFAULT_LOCATION.latitude, DEFAULT_LOCATION.longitude], {
     icon: L.divIcon({
       className: "",
@@ -836,6 +910,8 @@ function initChartMap() {
     baseLayers: { streetBase, satelliteBase, emodnetMean, gebcoRelief },
     meteo,
     rain,
+    rainRadar,
+    rainSamples,
     positionMarker,
     accuracyCircle
   };
@@ -919,7 +995,8 @@ function chartLayerSummary() {
   const entries = Object.entries(state.chartLayerHealth);
   if (!entries.length) return "OSM, OpenSeaMap and EMODnet configured";
   const failed = entries.filter(([, value]) => !value.ok);
-  if (failed.length === 0) return "OSM, Esri imagery, OpenSeaMap, EMODnet depth/contours and GEBCO available";
+  const radar = state.rainRadar?.sourceOk ? ", RainViewer near-now radar" : "";
+  if (failed.length === 0) return `OSM, Esri imagery, OpenSeaMap, EMODnet depth/contours, GEBCO${radar} available`;
   return `Layer warning: ${failed.map(([name]) => name).join(", ")}`;
 }
 
@@ -938,29 +1015,11 @@ async function fetchWeather(locationValue) {
   const params = new URLSearchParams({
     latitude: locationValue.latitude.toFixed(4),
     longitude: locationValue.longitude.toFixed(4),
-    current: [
-      "temperature_2m",
-      "relative_humidity_2m",
-      "wind_speed_10m",
-      "wind_direction_10m",
-      "wind_gusts_10m",
-      "precipitation",
-      "rain",
-      "showers",
-      "weather_code"
-    ].join(","),
-    hourly: [
-      "temperature_2m",
-      "precipitation",
-      "rain",
-      "showers",
-      "precipitation_probability",
-      "wind_speed_10m",
-      "wind_direction_10m",
-      "wind_gusts_10m"
-    ].join(","),
+    current: WEATHER_CURRENT_FIELDS.join(","),
+    hourly: WEATHER_HOURLY_FIELDS.join(","),
     forecast_days: "3",
-    timezone: locationValue.timezone || DEFAULT_LOCATION.timezone
+    timezone: locationValue.timezone || DEFAULT_LOCATION.timezone,
+    cell_selection: "sea"
   });
   return fetchJson(`https://api.open-meteo.com/v1/forecast?${params}`);
 }
@@ -998,21 +1057,60 @@ async function fetchMarine(locationValue) {
 }
 
 async function fetchMediterraneanWeather() {
-  const settled = await Promise.allSettled(
-    MEDITERRANEAN_POINTS.map(async (point) => ({
-      ...point,
-      payload: await fetchWeather(point)
-    }))
-  );
+  const chunks = chunk(MEDITERRANEAN_POINTS, MEDITERRANEAN_BATCH_SIZE);
+  const settled = await Promise.allSettled(chunks.map(fetchWeatherBatch));
   const points = settled
     .filter((result) => result.status === "fulfilled")
-    .map((result) => result.value);
+    .flatMap((result) => result.value);
   return {
-    sourceOk: points.length >= Math.min(6, MEDITERRANEAN_POINTS.length),
+    sourceOk: points.length >= Math.min(24, MEDITERRANEAN_POINTS.length),
     requested: MEDITERRANEAN_POINTS.length,
+    batches: chunks.length,
     failed: settled.filter((result) => result.status !== "fulfilled").length,
     points
   };
+}
+
+async function fetchWeatherBatch(points) {
+  const params = new URLSearchParams({
+    latitude: points.map((point) => point.latitude.toFixed(4)).join(","),
+    longitude: points.map((point) => point.longitude.toFixed(4)).join(","),
+    current: WEATHER_CURRENT_FIELDS.join(","),
+    hourly: WEATHER_HOURLY_FIELDS.join(","),
+    forecast_days: "3",
+    timezone: points.map((point) => point.timezone || DEFAULT_LOCATION.timezone).join(","),
+    cell_selection: "sea"
+  });
+  const payload = await fetchJson(`https://api.open-meteo.com/v1/forecast?${params}`, 16000);
+  const payloads = Array.isArray(payload) ? payload : [payload];
+  return points.map((point, index) => ({
+    ...point,
+    payload: payloads[index] || null
+  })).filter((point) => point.payload);
+}
+
+async function fetchRainViewerTimeline() {
+  const payload = await fetchJson(RAINVIEWER_API_URL, 8000);
+  const past = Array.isArray(payload?.radar?.past) ? payload.radar.past.map((frame) => ({ ...frame, kind: "past" })) : [];
+  const nowcast = Array.isArray(payload?.radar?.nowcast) ? payload.radar.nowcast.map((frame) => ({ ...frame, kind: "nowcast" })) : [];
+  const frames = [...past, ...nowcast]
+    .filter((frame) => frame?.path && Number.isFinite(Number(frame.time)))
+    .sort((a, b) => Number(a.time) - Number(b.time));
+  return {
+    sourceOk: frames.length > 0,
+    host: payload?.host || "https://tilecache.rainviewer.com",
+    generated: payload?.generated || null,
+    frames,
+    message: frames.length ? "Radar frames loaded" : "No radar frames in RainViewer response"
+  };
+}
+
+function chunk(items, size) {
+  const output = [];
+  for (let index = 0; index < items.length; index += size) {
+    output.push(items.slice(index, index + size));
+  }
+  return output;
 }
 
 async function fetchJson(url, timeoutMs = 10000) {
@@ -1429,7 +1527,7 @@ function toggleTimelinePlayback() {
 
 function startTimelinePlayback() {
   if (state.isPlaying) return;
-  if (state.selectedFrame >= TIMELINE.length - 1) selectFrame(0);
+  if (state.selectedFrame >= timelineLength() - 1) selectFrame(0);
   state.isPlaying = true;
   updatePlayButton();
   state.playTimer = window.setInterval(advanceTimelinePlayback, playbackIntervalMs());
@@ -1446,12 +1544,12 @@ function stopTimelinePlayback() {
 
 function advanceTimelinePlayback() {
   const nextIndex = state.selectedFrame + 1;
-  if (nextIndex >= TIMELINE.length) {
+  if (nextIndex >= timelineLength()) {
     stopTimelinePlayback();
     return;
   }
   selectFrame(nextIndex);
-  if (nextIndex >= TIMELINE.length - 1) {
+  if (nextIndex >= timelineLength() - 1) {
     window.setTimeout(stopTimelinePlayback, playbackIntervalMs());
   }
 }
@@ -1512,11 +1610,15 @@ function updateMapFocusState() {
 }
 
 function selectFrame(index) {
-  state.selectedFrame = index;
-  el.timelineSlider.value = String(index);
+  const max = timelineLength() - 1;
+  state.selectedFrame = Math.max(0, Math.min(max, Number(index) || 0));
+  el.timelineSlider.value = String(state.selectedFrame);
+  buildTimelineControls();
   document.querySelectorAll(".timeline-ticks [data-index]").forEach((tick) => {
-    tick.dataset.active = String(Number(tick.dataset.index) === index);
+    tick.dataset.active = String(Number(tick.dataset.index) === state.selectedFrame);
   });
+  document.querySelector(`.timeline-ticks [data-index="${state.selectedFrame}"]`)
+    ?.scrollIntoView({ inline: "center", block: "nearest", behavior: state.isPlaying ? "smooth" : "auto" });
   renderFrame();
 }
 
@@ -1670,7 +1772,8 @@ function renderCalculation(frame) {
   const rainLine = `rain=${frame.weather.precipitationMm ?? "na"}mm/h, probability=${frame.weather.precipitationProbability ?? "na"}%`;
   const weatherLine = `wind=${windKn ?? "na"}kn, gust=${gustKn ?? "na"}kn, temp=${frame.weather.temperature ?? "na"}C`;
   const marineLine = `wave=${frame.marine.waveHeight ?? "na"}m, current=${kmhToKnots(frame.marine.currentVelocityKmh) ?? "na"}kn`;
-  const regionalLine = `med_grid=${state.regionalWeather?.points?.length || 0}/${state.regionalWeather?.requested || MEDITERRANEAN_POINTS.length} samples, visual_weight=0.00`;
+  const regionalLine = `med_grid=${state.regionalWeather?.points?.length || 0}/${state.regionalWeather?.requested || MEDITERRANEAN_POINTS.length} samples, batches=${state.regionalWeather?.batches || 0}, visual_weight=0.00`;
+  const radarLine = `rain_radar=${state.rainRadar?.sourceOk ? "RainViewer near-now active" : "not_available"}, frames=${state.rainRadar?.frames?.length || 0}, confidence_weight=0.00`;
   const chartLine = `chart=${state.baseMode}, depth=EMODnet, seamarks=OpenSeaMap, satellite=Esri, official_enc=not_bundled`;
   const archiveLine = `archive=${state.forecastArchiveCount}/${MAX_LOCAL_ARCHIVE_SNAPSHOTS} local forecast snapshots`;
   const weightLine = `weights weather=${weights.weather}, marine=${weights.marine}, seed=${weights.seed}`;
@@ -1682,6 +1785,7 @@ function renderCalculation(frame) {
     rainLine,
     marineLine,
     regionalLine,
+    radarLine,
     backend.summary,
     ...backend.variables,
     chartLine,
@@ -1735,17 +1839,18 @@ function renderVectors(frame) {
   el.rainSvgLayer?.replaceChildren();
   const windDirection = frame.weather.windDirection ?? 300;
   const currentDirection = frame.marine.currentDirection ?? 42;
-  const windStrength = Math.min(46, 22 + (kmhToKnots(frame.weather.windSpeedKmh) || 8) * 0.7);
+  const windKn = kmhToKnots(frame.weather.windSpeedKmh) || 8;
+  const windStrength = Math.min(46, 22 + windKn * 0.7);
   const currentStrength = Math.min(32, 14 + (kmhToKnots(frame.marine.currentVelocityKmh) || 2) * 1.2);
   [
     [178, 108], [272, 144], [154, 254], [286, 301], [151, 394], [265, 491]
   ].forEach(([x, y], index) => {
-    el.windLayer.append(vectorPath(x, y, windDirection + index * 4, windStrength, "wind-arrow"));
+    el.windLayer.append(vectorPath(x, y, windDirection + index * 4, windStrength, "wind-arrow", windColor(windKn)));
   });
   [
     [224, 382], [336, 252], [205, 552]
   ].forEach(([x, y], index) => {
-    el.currentLayer.append(vectorPath(x, y, currentDirection - index * 7, currentStrength, "current-arrow"));
+    el.currentLayer.append(vectorPath(x, y, currentDirection - index * 7, currentStrength, "current-arrow", "#2f8a6f"));
   });
   const warningVisible = frame.confidence < 48 || (frame.weather.precipitationMm ?? 0) >= 3 || (frame.weather.precipitationProbability ?? 0) > 55;
   el.warningZone.style.opacity = warningVisible ? "1" : ".35";
@@ -1784,10 +1889,11 @@ function updateChart(frame) {
 }
 
 function renderRainLayer(frame) {
-  if (!state.chart?.ready || !state.chart.rain || !window.L) return;
-  const rainLayer = state.chart.rain;
+  if (!state.chart?.ready || !state.chart.rainSamples || !window.L) return;
+  const rainLayer = state.chart.rainSamples;
   rainLayer.clearLayers();
-  if (!state.chart.map.hasLayer(rainLayer)) return;
+  syncRainRadarLayer(frame);
+  if (!state.chart.map.hasLayer(state.chart.layers.rain)) return;
 
   const L = window.L;
   regionalSamplesForFrame(frame).forEach((sample) => {
@@ -1804,23 +1910,55 @@ function renderRainLayer(frame) {
   });
 }
 
+function syncRainRadarLayer(frame) {
+  if (!state.chart?.ready || !state.chart.rainRadar || !window.L) return;
+  const radarLayer = state.chart.rainRadar;
+  radarLayer.clearLayers();
+  if (!state.chart.map.hasLayer(state.chart.layers.rain)) return;
+  const radarFrame = selectRainRadarFrame(frame);
+  if (!radarFrame) return;
+  const host = state.rainRadar?.host || "https://tilecache.rainviewer.com";
+  const tileUrl = `${host}${radarFrame.path}/256/{z}/{x}/{y}/2/1_1.png`;
+  window.L.tileLayer(tileUrl, {
+    opacity: 0.48,
+    maxZoom: 18,
+    maxNativeZoom: 7,
+    attribution: "Radar &copy; RainViewer",
+    className: "rain-radar-tile"
+  }).addTo(radarLayer);
+}
+
+function selectRainRadarFrame(frame) {
+  const frames = Array.isArray(state.rainRadar?.frames) ? state.rainRadar.frames : [];
+  if (!frame || frame.hours > 1 || frames.length === 0) return null;
+  const target = Math.floor(Date.now() / 1000) + Math.max(0, frame.hours) * 3600;
+  return frames.reduce((best, candidate) => {
+    if (!best) return candidate;
+    return Math.abs(Number(candidate.time) - target) < Math.abs(Number(best.time) - target) ? candidate : best;
+  }, null);
+}
+
 function renderSvgRain(frame) {
   if (!el.rainSvgLayer) return;
-  const intensity = Number(frame?.weather?.precipitationMm);
-  if (!Number.isFinite(intensity) || intensity < 0.05) return;
-  const count = Math.min(9, Math.max(2, Math.round(2 + intensity * 1.5)));
+  const intensity = Math.max(0, Number(frame?.weather?.precipitationMm) || 0);
+  if (intensity < 0.05) return;
+  const count = Math.min(28, Math.max(6, Math.round(8 + intensity * 2.2)));
+  const drift = ((frame.hours || 0) * 17) % 96;
   for (let index = 0; index < count; index += 1) {
-    const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-    const x = 125 + ((index * 47 + frame.hours * 9) % 230);
-    const y = 70 + ((index * 71 + frame.hours * 13) % 430);
+    const streak = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    const x = 112 + ((index * 37 + drift) % 285);
+    const y = 58 + ((index * 61 + drift * 1.8) % 492);
     const value = Math.max(0.1, intensity + ((index % 4) - 1.5) * 0.35);
-    circle.setAttribute("class", "rain-blob");
-    circle.setAttribute("cx", String(x));
-    circle.setAttribute("cy", String(y));
-    circle.setAttribute("r", String(18 + Math.min(46, value * 4.2)));
-    circle.setAttribute("fill", rainIntensityColor(value));
-    circle.setAttribute("opacity", String(rainOpacity(value)));
-    el.rainSvgLayer.append(circle);
+    const length = 16 + Math.min(34, value * 5.4);
+    streak.setAttribute("class", "rain-streak");
+    streak.setAttribute("x1", String(x));
+    streak.setAttribute("y1", String(y));
+    streak.setAttribute("x2", String(x + 9));
+    streak.setAttribute("y2", String(y + length));
+    streak.setAttribute("stroke", rainIntensityColor(value));
+    streak.setAttribute("stroke-width", String(Math.min(6, 1.4 + value * 0.55)));
+    streak.setAttribute("opacity", String(Math.min(0.82, rainOpacity(value) + 0.16)));
+    el.rainSvgLayer.append(streak);
   }
 }
 
@@ -1877,12 +2015,12 @@ function sampleTooltip(sample) {
 
 function rainRadiusM(value) {
   const intensity = Math.max(0, Number(value) || 0);
-  return 12000 + Math.min(66000, intensity * 7800);
+  return 4500 + Math.min(26000, intensity * 4200);
 }
 
 function rainOpacity(value) {
   const intensity = Math.max(0, Number(value) || 0);
-  return Math.min(0.76, 0.24 + intensity * 0.055);
+  return Math.min(0.68, 0.18 + intensity * 0.045);
 }
 
 function rainIntensityColor(value) {
@@ -2049,14 +2187,29 @@ function updateChartStatus(frame, override) {
   updateChartDataState();
 }
 
-function vectorPath(x, y, directionDegrees, length, className) {
+function vectorPath(x, y, directionDegrees, length, className, color) {
   const radians = (directionDegrees - 90) * Math.PI / 180;
   const x2 = x + Math.cos(radians) * length;
   const y2 = y + Math.sin(radians) * length;
+  const headLength = className === "wind-arrow" ? 9 : 7;
+  const spread = 0.58;
+  const leftX = x2 - Math.cos(radians - spread) * headLength;
+  const leftY = y2 - Math.sin(radians - spread) * headLength;
+  const rightX = x2 - Math.cos(radians + spread) * headLength;
+  const rightY = y2 - Math.sin(radians + spread) * headLength;
+  const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
   const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-  path.setAttribute("class", className);
+  const head = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  group.setAttribute("class", className);
+  group.style.color = color || "currentColor";
+  path.setAttribute("class", "vector-shaft");
   path.setAttribute("d", `M${x} ${y}L${x2.toFixed(1)} ${y2.toFixed(1)}`);
-  return path;
+  path.setAttribute("stroke", color || "currentColor");
+  head.setAttribute("class", "vector-head");
+  head.setAttribute("d", `M${x2.toFixed(1)} ${y2.toFixed(1)}L${leftX.toFixed(1)} ${leftY.toFixed(1)}L${rightX.toFixed(1)} ${rightY.toFixed(1)}Z`);
+  head.setAttribute("fill", color || "currentColor");
+  group.append(path, head);
+  return group;
 }
 
 function useGps() {

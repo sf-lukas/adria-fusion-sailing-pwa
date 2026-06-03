@@ -1,6 +1,6 @@
 {
   "schema_version": "adria_fusion_sources_v1",
-  "updated_at": "2026-06-02",
+  "updated_at": "2026-06-03",
   "sources": [
     {
       "id": "open_meteo_weather",
@@ -38,9 +38,17 @@
       "id": "mediterranean_open_meteo_grid",
       "name": "Mediterranean Open-Meteo Forecast Grid",
       "url": "https://open-meteo.com/en/docs",
-      "role": "Browser-side sea-area sample grid for rain and wind visualization across the Mediterranean",
+      "role": "Browser-side batched sea-area sample grid for rain and wind visualization across the Mediterranean",
       "variables": ["precipitation", "rain", "showers", "precipitation_probability", "wind_speed_10m", "wind_direction_10m", "wind_gusts_10m"],
-      "prototype_status": "active_visualization_only_not_confidence_weighted"
+      "prototype_status": "active_91_points_batched_visualization_only_not_confidence_weighted"
+    },
+    {
+      "id": "rainviewer_radar",
+      "name": "RainViewer Weather Radar Tiles",
+      "url": "https://www.rainviewer.com/api/weather-maps-api.html",
+      "role": "Near-now radar overlay for active precipitation structure; not a future forecast confidence input",
+      "variables": ["radar.past[].time", "radar.past[].path", "tile PNG reflectivity overlay"],
+      "prototype_status": "active_near_now_map_layer_not_confidence_weighted"
     },
     {
       "id": "copernicus_marine",

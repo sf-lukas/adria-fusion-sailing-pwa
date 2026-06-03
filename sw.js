@@ -1,5 +1,7 @@
-const CACHE_NAME = "adria-fusion-sailing-v0-12";
+const CACHE_NAME = "adria-fusion-sailing-v0-13";
 const NETWORK_ONLY_HOSTS = new Set([
+  "api.rainviewer.com",
+  "tilecache.rainviewer.com",
   "tile.openstreetmap.org",
   "tiles.openseamap.org",
   "server.arcgisonline.com",

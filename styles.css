@@ -493,19 +493,37 @@ svg.forecast-map {
 
 .wind-arrow {
   fill: none;
-  stroke: var(--warn);
+  color: var(--warn);
   stroke-linecap: round;
+}
+
+.wind-arrow .vector-shaft {
+  fill: none;
+  stroke: currentColor;
   stroke-width: 3;
-  marker-end: url("#windArrow");
+  stroke-linecap: round;
+}
+
+.wind-arrow .vector-head {
+  fill: currentColor;
 }
 
 .current-arrow {
   fill: none;
-  stroke: var(--ok);
+  color: var(--ok);
   stroke-linecap: round;
-  stroke-width: 2.4;
-  marker-end: url("#currentArrow");
   opacity: .72;
+}
+
+.current-arrow .vector-shaft {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+}
+
+.current-arrow .vector-head {
+  fill: currentColor;
 }
 
 .play-dock {
@@ -573,14 +591,21 @@ svg.forecast-map {
 }
 
 .timeline-ticks {
-  display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
+  display: flex;
   gap: 4px;
+  overflow-x: auto;
   margin-top: -3px;
+  scrollbar-width: none;
+}
+
+.timeline-ticks::-webkit-scrollbar {
+  display: none;
 }
 
 .timeline-ticks span {
-  min-width: 0;
+  flex: 0 0 auto;
+  min-width: 42px;
+  padding: 2px 0;
   color: var(--muted);
   font-size: 10px;
   font-weight: 950;
@@ -769,7 +794,9 @@ pre {
 }
 
 .settings-page {
+  width: min(920px, 100%);
   max-width: 920px;
+  overflow-x: hidden;
 }
 
 .settings-lead {
@@ -790,6 +817,7 @@ pre {
 .settings-row,
 .settings-code,
 .settings-limits {
+  min-width: 0;
   border: 1px solid var(--line);
   border-radius: 6px;
   background: var(--panel);
@@ -805,6 +833,7 @@ pre {
 .settings-row small {
   color: var(--muted);
   font-size: 12px;
+  overflow-wrap: anywhere;
 }
 
 .settings-summary b {
@@ -816,6 +845,7 @@ pre {
 .settings-list {
   display: grid;
   gap: 8px;
+  min-width: 0;
   margin: 10px 0 22px;
 }
 
@@ -830,14 +860,17 @@ pre {
 .settings-row > div:first-child {
   display: grid;
   gap: 3px;
+  min-width: 0;
 }
 
 .settings-row b {
   font-size: 15px;
+  overflow-wrap: anywhere;
 }
 
 .settings-row strong {
   font-size: 12px;
+  overflow-wrap: anywhere;
 }
 
 .settings-meter {
@@ -860,14 +893,17 @@ pre {
 
 .source-settings-row a {
   justify-self: end;
+  overflow-wrap: anywhere;
 }
 
 .settings-code {
   overflow-x: auto;
+  max-width: 100%;
   padding: 12px;
   color: var(--ink);
   font-size: 12px;
   white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .settings-limits {
@@ -875,6 +911,25 @@ pre {
 }
 
 @media (max-width: 680px) {
+  html,
+  body {
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+
+  .content-page {
+    width: 100%;
+    max-width: 100vw;
+    padding-inline: 12px;
+  }
+
+  .settings-page > *,
+  .settings-row > *,
+  .source-settings-row > * {
+    min-width: 0;
+    max-width: 100%;
+  }
+
   .settings-row,
   .source-settings-row {
     grid-template-columns: 1fr;
@@ -1419,6 +1474,15 @@ body.map-focus .situation-strip {
 
 .rain-blob {
   animation: rainPulse 1.8s ease-in-out infinite;
+  mix-blend-mode: multiply;
+}
+
+.rain-streak {
+  stroke-linecap: round;
+  mix-blend-mode: screen;
+}
+
+.rain-radar-tile {
   mix-blend-mode: multiply;
 }
 
