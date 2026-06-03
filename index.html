@@ -76,6 +76,7 @@
           <button type="button" data-layer="warnings" data-active="true" data-i18n="layer.warnings">Warnings</button>
         </div>
         <div class="menu-grid chart-layer-bar" aria-label="Nautical chart layers">
+          <button type="button" data-chart-layer="rain" data-active="true" data-i18n="chart.rain">Rain</button>
           <button type="button" data-chart-layer="depth" data-active="true" data-i18n="chart.depth">Depth</button>
           <button type="button" data-chart-layer="contours" data-active="true" data-i18n="chart.contours">Lines</button>
           <button type="button" data-chart-layer="seamarks" data-active="true" data-i18n="chart.seamarks">Marks</button>
@@ -115,6 +116,13 @@
 
     <section class="map-card" aria-label="Forecast map">
       <div id="chartMap" class="chart-map" role="application" aria-label="Live nautical chart map for Split and Brac"></div>
+      <div class="rain-legend" aria-label="Rain intensity legend">
+        <span>Niesel</span>
+        <span>Leicht</span>
+        <span>Moderat</span>
+        <span>Stark</span>
+        <span>Hagel</span>
+      </div>
 
       <svg id="weatherMap" class="forecast-map" viewBox="0 0 430 620" role="img" aria-label="Croatia sailing forecast map" hidden>
         <defs>
@@ -145,6 +153,7 @@
         <g data-svg-layer="warnings">
           <path id="warningZone" class="warning-zone" d="M242 58C300 38 367 64 391 117C414 167 377 208 312 206C252 204 215 164 214 116C213 87 224 66 242 58Z"></path>
         </g>
+        <g data-svg-layer="rain" id="rainSvgLayer"></g>
 
         <path class="route" d="M112 320C159 300 204 284 245 250C282 220 300 200 317 184"></path>
         <circle id="accuracyRing" class="accuracy" cx="112" cy="320" r="34"></circle>

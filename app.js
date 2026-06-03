@@ -61,6 +61,7 @@ const I18N = {
     "layer.wave": "Wave",
     "layer.current": "Current",
     "layer.warnings": "Warnings",
+    "chart.rain": "Rain",
     "chart.depth": "Depth",
     "chart.contours": "Lines",
     "chart.seamarks": "Marks",
@@ -164,6 +165,7 @@ const I18N = {
     "layer.wave": "Welle",
     "layer.current": "Strom",
     "layer.warnings": "Warnung",
+    "chart.rain": "Regen",
     "chart.depth": "Tiefe",
     "chart.contours": "Linien",
     "chart.seamarks": "Marken",
@@ -267,6 +269,7 @@ const I18N = {
     "layer.wave": "Val",
     "layer.current": "Struja",
     "layer.warnings": "Upoz.",
+    "chart.rain": "Kisa",
     "chart.depth": "Dubina",
     "chart.contours": "Linije",
     "chart.seamarks": "Oznake",
@@ -454,6 +457,7 @@ const el = {
   calculationBox: document.getElementById("calculationBox"),
   windLayer: document.getElementById("windLayer"),
   currentLayer: document.getElementById("currentLayer"),
+  rainSvgLayer: document.getElementById("rainSvgLayer"),
   positionDot: document.getElementById("positionDot"),
   accuracyRing: document.getElementById("accuracyRing"),
   warningZone: document.getElementById("warningZone")
@@ -739,6 +743,7 @@ function initChartMap() {
   });
 
   const meteo = L.layerGroup().addTo(map);
+  const rain = L.layerGroup().addTo(map);
   const positionMarker = L.marker([DEFAULT_LOCATION.latitude, DEFAULT_LOCATION.longitude], {
     icon: L.divIcon({
       className: "",
@@ -758,9 +763,10 @@ function initChartMap() {
   state.chart = {
     ready: true,
     map,
-    layers: { streetBase, satelliteBase, depth, contours, seamarks, shoals, quality, route },
+    layers: { streetBase, satelliteBase, rain, depth, contours, seamarks, shoals, quality, route },
     baseLayers: { streetBase, satelliteBase, emodnetMean, gebcoRelief },
     meteo,
+    rain,
     positionMarker,
     accuracyCircle
   };
@@ -810,8 +816,11 @@ function setBaseMode(mode) {
 }
 
 function toggleChartLayer(name, active) {
+  const svgTarget = document.querySelector(`[data-svg-layer="${name}"]`);
+  if (svgTarget) svgTarget.style.display = active ? "" : "none";
   if (!state.chart?.map || !state.chart.layers?.[name]) return;
   setLayerActive(state.chart.layers[name], active);
+  if (active && name === "rain") renderRainLayer(state.frames[state.selectedFrame]);
   updateChartStatus(state.frames[state.selectedFrame]);
 }
 
@@ -1548,6 +1557,7 @@ function backendFusionVariableLine(variable, item) {
 function renderVectors(frame) {
   el.windLayer.replaceChildren();
   el.currentLayer.replaceChildren();
+  el.rainSvgLayer?.replaceChildren();
   const windDirection = frame.weather.windDirection ?? 300;
   const currentDirection = frame.marine.currentDirection ?? 42;
   const windStrength = Math.min(46, 22 + (kmhToKnots(frame.weather.windSpeedKmh) || 8) * 0.7);
@@ -1564,6 +1574,7 @@ function renderVectors(frame) {
   });
   const warningVisible = frame.confidence < 48 || (frame.weather.precipitationProbability ?? 0) > 55;
   el.warningZone.style.opacity = warningVisible ? "1" : ".35";
+  renderSvgRain(frame);
 }
 
 function updateChart(frame) {
@@ -1579,6 +1590,7 @@ function updateChart(frame) {
   const currentKn = kmhToKnots(frame.marine.currentVelocityKmh);
   addVectorMarker(meteo, destination(center, 315, 3.5), frame.weather.windDirection ?? 300, "wind", `Wind ${windKn ?? "--"} kn`);
   addVectorMarker(meteo, destination(center, 128, 3.5), frame.marine.currentDirection ?? 42, "current", `Current ${currentKn ?? "--"} kn`);
+  renderRainLayer(frame);
 
   const confidenceColor = frame.confidence < 48 ? "#e65b4f" : frame.confidence < 60 ? "#c67b2e" : "#2f8a6f";
   accuracyCircle.setStyle({ color: confidenceColor, fillColor: confidenceColor });
@@ -1589,6 +1601,90 @@ function updateChart(frame) {
     map.setView(center, Math.max(map.getZoom(), 10), { animate: false });
   }
   updateChartStatus(frame);
+}
+
+function renderRainLayer(frame) {
+  if (!state.chart?.ready || !state.chart.rain || !window.L) return;
+  const rainLayer = state.chart.rain;
+  rainLayer.clearLayers();
+  if (!state.chart.map.hasLayer(rainLayer)) return;
+
+  const probability = rainProbabilityForFrame(frame);
+  if (probability < 5) return;
+
+  const L = window.L;
+  const center = [state.location.latitude, state.location.longitude];
+  forecastRainCells(center, probability, frame.hours).forEach((cell) => {
+    L.circle(cell.coords, {
+      radius: cell.radiusM,
+      stroke: false,
+      fillColor: rainColor(cell.value),
+      fillOpacity: cell.opacity,
+      className: "rain-cell",
+      interactive: true
+    }).bindTooltip(`Rain ${Math.round(cell.value)}%`).addTo(rainLayer);
+  });
+}
+
+function renderSvgRain(frame) {
+  if (!el.rainSvgLayer) return;
+  const probability = rainProbabilityForFrame(frame);
+  if (probability < 5) return;
+  const count = Math.min(12, Math.max(3, Math.round(probability / 8)));
+  for (let index = 0; index < count; index += 1) {
+    const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    const x = 125 + ((index * 47 + frame.hours * 9) % 230);
+    const y = 70 + ((index * 71 + frame.hours * 13) % 430);
+    const value = Math.min(100, probability + ((index % 4) - 1.5) * 11);
+    circle.setAttribute("class", "rain-blob");
+    circle.setAttribute("cx", String(x));
+    circle.setAttribute("cy", String(y));
+    circle.setAttribute("r", String(24 + value * 0.24));
+    circle.setAttribute("fill", rainColor(value));
+    circle.setAttribute("opacity", String(Math.min(0.82, 0.28 + value / 160)));
+    el.rainSvgLayer.append(circle);
+  }
+}
+
+function rainProbabilityForFrame(frame) {
+  const direct = Number(frame?.weather?.precipitationProbability);
+  if (Number.isFinite(direct)) return Math.max(0, Math.min(100, direct));
+  const nextRain = state.quickEvents?.nextRain;
+  if (frame?.hours === 0 && nextRain && nextRain.leadHours <= 1.5) {
+    return Math.max(0, Math.min(100, Number(nextRain.value) || 0));
+  }
+  return 0;
+}
+
+function forecastRainCells(center, probability, leadHours) {
+  const normalized = Math.max(0, Math.min(1, probability / 100));
+  const count = Math.min(20, Math.max(4, Math.round(4 + normalized * 16)));
+  const trackBearing = 245 + (leadHours * 7) % 44;
+  return Array.from({ length: count }, (_, index) => {
+    const lane = (index % 5) - 2;
+    const row = Math.floor(index / 5);
+    const alongKm = -8 + row * 7 + leadHours * 0.35;
+    const crossKm = lane * (2.2 + normalized * 1.4);
+    const base = destination(center, trackBearing, Math.max(0.8, Math.abs(alongKm)));
+    const signedBase = alongKm < 0 ? destination(center, trackBearing + 180, Math.abs(alongKm)) : base;
+    const coords = destination(signedBase, trackBearing + 90, crossKm);
+    const value = Math.max(5, Math.min(100, probability + lane * 6 + (row % 3) * 8 - 6));
+    return {
+      coords,
+      value,
+      radiusM: 1800 + normalized * 5200 + (index % 3) * 750,
+      opacity: Math.min(0.68, 0.22 + value / 140)
+    };
+  });
+}
+
+function rainColor(value) {
+  if (value >= 85) return "#f5d536";
+  if (value >= 68) return "#f06555";
+  if (value >= 52) return "#b946e6";
+  if (value >= 34) return "#3978e6";
+  if (value >= 18) return "#30bdf0";
+  return "#8deff2";
 }
 
 async function queryDepthAt(latlng) {
