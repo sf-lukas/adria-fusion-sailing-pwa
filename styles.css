@@ -768,6 +768,123 @@ pre {
   margin: 8px 0;
 }
 
+.settings-page {
+  max-width: 920px;
+}
+
+.settings-lead {
+  max-width: 760px;
+  color: var(--soft-ink);
+  font-weight: 650;
+  line-height: 1.45;
+}
+
+.settings-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 8px;
+  margin: 18px 0;
+}
+
+.settings-summary article,
+.settings-row,
+.settings-code,
+.settings-limits {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel);
+  box-shadow: 0 8px 20px var(--shadow);
+}
+
+.settings-summary article {
+  padding: 12px;
+}
+
+.settings-summary span,
+.settings-row span,
+.settings-row small {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.settings-summary b {
+  display: block;
+  margin-top: 4px;
+  font-size: 22px;
+}
+
+.settings-list {
+  display: grid;
+  gap: 8px;
+  margin: 10px 0 22px;
+}
+
+.settings-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(110px, 180px) 58px 110px;
+  gap: 10px;
+  align-items: center;
+  padding: 10px;
+}
+
+.settings-row > div:first-child {
+  display: grid;
+  gap: 3px;
+}
+
+.settings-row b {
+  font-size: 15px;
+}
+
+.settings-row strong {
+  font-size: 12px;
+}
+
+.settings-meter {
+  height: 10px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #d7e1de;
+}
+
+.settings-meter i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--sea);
+}
+
+.source-settings-row {
+  grid-template-columns: minmax(0, 1fr) minmax(145px, 230px) 58px;
+}
+
+.source-settings-row a {
+  justify-self: end;
+}
+
+.settings-code {
+  overflow-x: auto;
+  padding: 12px;
+  color: var(--ink);
+  font-size: 12px;
+  white-space: pre-wrap;
+}
+
+.settings-limits {
+  padding: 12px 12px 12px 28px;
+}
+
+@media (max-width: 680px) {
+  .settings-row,
+  .source-settings-row {
+    grid-template-columns: 1fr;
+  }
+
+  .source-settings-row a {
+    justify-self: start;
+  }
+}
+
 @media (min-width: 760px) {
   .app-shell {
     width: min(760px, 100vw);
@@ -1041,6 +1158,65 @@ body.map-focus .forecast-map {
   color: #fff;
 }
 
+.menu-grid button[data-pending="true"],
+.menu-grid button[data-limited="true"] {
+  position: relative;
+  padding-bottom: 15px;
+}
+
+.menu-grid button[data-pending="true"] {
+  border-style: dashed;
+  border-color: rgba(247, 196, 67, .72);
+  background: rgba(42, 54, 58, .72);
+  color: rgba(255, 255, 255, .66);
+  cursor: not-allowed;
+}
+
+.menu-grid button[data-pending="true"]::after,
+.menu-grid button[data-limited="true"]::after {
+  position: absolute;
+  right: 5px;
+  bottom: 3px;
+  left: 5px;
+  overflow: hidden;
+  font-size: 8px;
+  font-weight: 950;
+  letter-spacing: 0;
+  line-height: 1;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+  content: "pending";
+}
+
+.menu-grid button[data-limited="true"]::after {
+  color: #f1bd2d;
+  content: "limited";
+}
+
+.zoom-bar {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.zoom-bar button {
+  min-height: 36px;
+  font-size: 13px;
+}
+
+.settings-link {
+  display: block;
+  margin: 7px;
+  padding: 9px 10px;
+  border: 1px solid rgba(226, 246, 250, .24);
+  border-radius: 6px;
+  background: rgba(241, 249, 251, .12);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 900;
+  text-align: center;
+  text-decoration: none;
+}
+
 .depth-legend {
   background: rgba(8, 44, 63, .84);
   color: rgba(244, 250, 251, .86);
@@ -1069,6 +1245,27 @@ body.map-focus .play-dock {
 .play-head {
   grid-template-columns: 54px minmax(0, 1fr);
   gap: 8px;
+}
+
+.speed-bar {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5px;
+}
+
+.speed-bar button {
+  min-height: 28px;
+  border: 1px solid rgba(226, 246, 250, .24);
+  border-radius: 6px;
+  background: rgba(241, 249, 251, .1);
+  color: rgba(236, 248, 250, .72);
+  font-size: 11px;
+  font-weight: 950;
+}
+
+.speed-bar button[data-active="true"] {
+  background: #f1bd2d;
+  color: #10211f;
 }
 
 .play-button {
@@ -1174,7 +1371,7 @@ body.map-focus .situation-strip {
   bottom: calc(178px + env(safe-area-inset-bottom));
   left: 8px;
   display: grid;
-  width: 92px;
+  width: 96px;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, .24);
   border-radius: 6px;
@@ -1223,6 +1420,77 @@ body.map-focus .situation-strip {
 .rain-blob {
   animation: rainPulse 1.8s ease-in-out infinite;
   mix-blend-mode: multiply;
+}
+
+.wind-legend {
+  position: absolute;
+  z-index: 730;
+  bottom: calc(178px + env(safe-area-inset-bottom));
+  left: 112px;
+  display: grid;
+  gap: 2px;
+  width: 104px;
+  padding: 5px 6px;
+  border: 1px solid rgba(255, 255, 255, .24);
+  border-radius: 6px;
+  background: rgba(7, 42, 58, .82);
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(4, 18, 22, .22);
+  font-size: 10px;
+  font-weight: 900;
+  pointer-events: none;
+}
+
+.wind-legend span {
+  display: grid;
+  grid-template-columns: 14px 1fr;
+  gap: 5px;
+  align-items: center;
+}
+
+.wind-legend i {
+  display: inline-block;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+}
+
+.wind-calm {
+  background: #49d4b4;
+}
+
+.wind-fresh {
+  background: #f1bd2d;
+}
+
+.wind-strong {
+  background: #f06555;
+}
+
+.wind-field-marker {
+  display: grid;
+  place-items: center;
+  width: var(--wind-size);
+  height: var(--wind-size);
+  border: 1px solid rgba(255, 255, 255, .86);
+  border-radius: 50%;
+  background: var(--wind-color);
+  color: #fff;
+  box-shadow: 0 2px 9px rgba(4, 18, 22, .38);
+  font-weight: 950;
+}
+
+.wind-field-marker > span {
+  display: block;
+  font-size: 18px;
+  line-height: 1;
+  transform-origin: 50% 50%;
+}
+
+.wind-field-marker small {
+  margin-top: -5px;
+  font-size: 9px;
+  line-height: 1;
 }
 
 @keyframes rainPulse {
@@ -1302,7 +1570,12 @@ body.map-focus .situation-strip {
   }
 
   .rain-legend {
-    bottom: calc(184px + env(safe-area-inset-bottom));
+    bottom: calc(214px + env(safe-area-inset-bottom));
+  }
+
+  .wind-legend {
+    bottom: calc(214px + env(safe-area-inset-bottom));
+    left: 110px;
   }
 }
 
@@ -1313,6 +1586,10 @@ body.map-focus .situation-strip {
   }
 
   .rain-legend {
-    bottom: calc(118px + env(safe-area-inset-bottom));
+    bottom: calc(214px + env(safe-area-inset-bottom));
+  }
+
+  .wind-legend {
+    bottom: calc(214px + env(safe-area-inset-bottom));
   }
 }

@@ -7,7 +7,7 @@
       "name": "Open-Meteo Weather API",
       "url": "https://open-meteo.com/",
       "role": "Live browser-side weather forecast",
-      "variables": ["temperature_2m", "wind_speed_10m", "wind_direction_10m", "precipitation_probability"],
+      "variables": ["temperature_2m", "wind_speed_10m", "wind_direction_10m", "wind_gusts_10m", "precipitation", "rain", "showers", "precipitation_probability"],
       "prototype_status": "active"
     },
     {
@@ -33,6 +33,14 @@
       "role": "Croatia observation/warning truth context from local adapter snapshot",
       "variables": ["temperature_2m", "wind_speed_10m", "weather_text", "CAP warnings"],
       "prototype_status": "seed_snapshot_active_live_browser_cors_unconfirmed"
+    },
+    {
+      "id": "mediterranean_open_meteo_grid",
+      "name": "Mediterranean Open-Meteo Forecast Grid",
+      "url": "https://open-meteo.com/en/docs",
+      "role": "Browser-side sea-area sample grid for rain and wind visualization across the Mediterranean",
+      "variables": ["precipitation", "rain", "showers", "precipitation_probability", "wind_speed_10m", "wind_direction_10m", "wind_gusts_10m"],
+      "prototype_status": "active_visualization_only_not_confidence_weighted"
     },
     {
       "id": "copernicus_marine",

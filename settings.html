@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#10211f">
+  <link rel="stylesheet" href="styles.css">
+  <title>Sources and Weights - Adria Fusion Sailing</title>
+</head>
+<body>
+  <main class="content-page settings-page">
+    <a href="index.html">Back to map</a>
+    <h1>Sources and Weights</h1>
+    <p class="settings-lead">This page separates live forecast inputs, map/navigation context and prototype-only layers. Regional map samples are visual context; they do not silently raise the forecast confidence.</p>
+
+    <section class="settings-summary" aria-label="Current source summary">
+      <article>
+        <span>Forecast sources</span>
+        <b id="forecastSourceCount">--</b>
+      </article>
+      <article>
+        <span>Map sources</span>
+        <b id="mapSourceCount">--</b>
+      </article>
+      <article>
+        <span>Backend fusion</span>
+        <b id="backendFusionState">--</b>
+      </article>
+      <article>
+        <span>Truth/verification</span>
+        <b id="truthStateSettings">--</b>
+      </article>
+    </section>
+
+    <section>
+      <h2>Current prototype weights</h2>
+      <div id="weightList" class="settings-list"></div>
+    </section>
+
+    <section>
+      <h2>Data sources</h2>
+      <div id="sourceListSettings" class="settings-list"></div>
+    </section>
+
+    <section>
+      <h2>Calculation contract</h2>
+      <pre id="calculationContract" class="settings-code">Loading...</pre>
+    </section>
+
+    <section>
+      <h2>Pending and limits</h2>
+      <ul class="settings-limits">
+        <li>Forecast fallback map is marked pending because the reliable view is the real Leaflet map with sampled live points.</li>
+        <li>Warnings are marked pending until DHMZ CAP is wired as a live browser or backend source for the selected location.</li>
+        <li>Open-Meteo Marine current and tide-like fields are planning context only near coasts; official nautical sources are still required.</li>
+        <li>Official Croatian ENC/HHI chart data is not bundled and must be licensed before navigation-grade claims.</li>
+      </ul>
+    </section>
+  </main>
+  <script src="settings.js" type="module"></script>
+</body>
+</html>

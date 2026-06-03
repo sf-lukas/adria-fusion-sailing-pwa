@@ -54,10 +54,15 @@
         <summary data-i18n="control.map">Map</summary>
         <div class="menu-grid mode-bar" aria-label="Map mode">
           <button type="button" data-map-mode="chart" data-active="true" data-i18n="mode.chart">Real map</button>
-          <button type="button" data-map-mode="forecast" data-active="false" data-i18n="mode.forecast">Forecast</button>
+          <button type="button" data-map-mode="forecast" data-active="false" data-pending="true" aria-disabled="true" data-i18n="mode.forecast">Forecast</button>
         </div>
         <div class="menu-grid focus-bar" aria-label="Map focus">
           <button id="mapFocusButton" type="button" data-active="false" data-i18n="mode.focus">Map focus</button>
+        </div>
+        <div class="menu-grid zoom-bar" aria-label="Map zoom controls">
+          <button id="zoomOutButton" type="button" aria-label="Zoom out">-</button>
+          <button id="zoomInButton" type="button" aria-label="Zoom in">+</button>
+          <button id="mediterraneanButton" type="button" data-i18n="mode.mediterranean">Med</button>
         </div>
         <div class="menu-grid base-layer-bar" aria-label="Base map mode">
           <button type="button" data-base-mode="nautical" data-active="true" data-i18n="base.nautical">Marine</button>
@@ -72,8 +77,8 @@
         <div class="menu-grid layer-bar" aria-label="Forecast layer toggles">
           <button type="button" data-layer="wind" data-active="true" data-i18n="layer.wind">Wind</button>
           <button type="button" data-layer="wave" data-active="true" data-i18n="layer.wave">Wave</button>
-          <button type="button" data-layer="current" data-active="true" data-i18n="layer.current">Current</button>
-          <button type="button" data-layer="warnings" data-active="true" data-i18n="layer.warnings">Warnings</button>
+          <button type="button" data-layer="current" data-active="true" data-limited="true" data-i18n="layer.current">Current</button>
+          <button type="button" data-layer="warnings" data-active="false" data-pending="true" aria-disabled="true" data-i18n="layer.warnings">Warnings</button>
         </div>
         <div class="menu-grid chart-layer-bar" aria-label="Nautical chart layers">
           <button type="button" data-chart-layer="rain" data-active="true" data-i18n="chart.rain">Rain</button>
@@ -111,17 +116,23 @@
             <span data-i18n="status.truth">truth</span>
           </div>
         </div>
+        <a class="settings-link" href="settings.html" data-i18n="control.settings">Sources and weights</a>
       </details>
     </section>
 
     <section class="map-card" aria-label="Forecast map">
       <div id="chartMap" class="chart-map" role="application" aria-label="Live nautical chart map for Split and Brac"></div>
       <div class="rain-legend" aria-label="Rain intensity legend">
-        <span>Niesel</span>
-        <span>Leicht</span>
-        <span>Moderat</span>
-        <span>Stark</span>
-        <span>Hagel</span>
+        <span>0.1 mm/h</span>
+        <span>1 mm/h</span>
+        <span>3 mm/h</span>
+        <span>8 mm/h</span>
+        <span>15+ mm/h</span>
+      </div>
+      <div class="wind-legend" aria-label="Wind speed legend">
+        <span><i class="wind-calm"></i>0-10 kn</span>
+        <span><i class="wind-fresh"></i>10-20 kn</span>
+        <span><i class="wind-strong"></i>20+ kn</span>
       </div>
 
       <svg id="weatherMap" class="forecast-map" viewBox="0 0 430 620" role="img" aria-label="Croatia sailing forecast map" hidden>
@@ -177,6 +188,11 @@
           <span id="frameLabel" class="frame-label">Now</span>
           <h2 id="conditionText">Loading forecast</h2>
         </div>
+      </div>
+      <div class="speed-bar" aria-label="Playback speed">
+        <button type="button" data-play-speed="1" data-active="true">1x</button>
+        <button type="button" data-play-speed="2" data-active="false">2x</button>
+        <button type="button" data-play-speed="4" data-active="false">4x</button>
       </div>
       <div class="event-grid" aria-label="Next weather events">
         <article><span data-i18n="event.rain">Rain</span><b id="rainTiming">--</b></article>
